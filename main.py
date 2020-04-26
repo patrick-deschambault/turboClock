@@ -5,6 +5,7 @@ from PyQt5.QtCore import QTimer, QTime, QSettings
 from PyQt5.QtGui import QIcon
 
 from AddTFSTaskWindow import *
+from DutyDetailsWindow import *
 import datetime
 
 from BacklogMgr import *
@@ -31,6 +32,9 @@ class MainWindow(QWidget):
         self.btnStartPause = QPushButton('', self)
         self.btnStartPause.setIcon(QIcon('play_icon.png'))
         self.btnStartPause.clicked.connect(self.manageStartPauseClickedEvent)
+
+        self.btnDutyDetails = QPushButton('Duty details...')
+        self.btnDutyDetails.clicked.connect(self.manageDutyDetailsClickedEvent)
         
         self.btnAddTfsTask = QPushButton('', self)
         self.btnAddTfsTask.setIcon(QIcon('plus_icon.png'))
@@ -64,6 +68,7 @@ class MainWindow(QWidget):
         mainLayout.addLayout(layoutTimer)
         mainLayout.addLayout(fieldsInputLayout)
         mainLayout.addWidget(self.btnStartPause)
+        mainLayout.addWidget(self.btnDutyDetails)
         mainLayout.addLayout(layoutDutyStat)
 
         self.timer = QTimer(self)
@@ -77,6 +82,7 @@ class MainWindow(QWidget):
 
         self.startTime = 0
         self.stopTime = 0
+
  
     def initTFSTaskCombobox(self):
 
@@ -138,6 +144,7 @@ class MainWindow(QWidget):
             self.btnStartPause.setIcon(QIcon('play_icon.png'))
 
             self.taskTFSCb.setEnabled(True)
+            self.btnDutyDetails.setEnabled(True)
 
         else:
             self.timer.start(1000)
@@ -145,7 +152,13 @@ class MainWindow(QWidget):
             self.btnStartPause.setIcon(QIcon('pause_icon.png'))
 
             self.taskTFSCb.setEnabled(False)
+            self.btnDutyDetails.setEnabled(False)
 
+    def manageDutyDetailsClickedEvent(self):
+
+        ex = DutyDetailsWindow(self, self.backlogMgr.backlogData)
+        ex.show()
+    
     def manageAddTFSTaskEvent(self):
 
         ex = AddTFSTaskWindow(self)
