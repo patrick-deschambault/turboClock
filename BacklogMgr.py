@@ -1,7 +1,7 @@
+from Task import *
+from Duty import *
 
-from TaskGiro import *
-from ProjectGiro import *
-from TFSTask import *
+from datetime import *
 import os
 
 from BacklogData import *
@@ -12,216 +12,307 @@ class BacklogMgr():
 
         self.backlogData = BacklogData()
 
+        self.initCurrDate()
 
-    def loadGiroTaskProjectCodesData(self):
+        dataPath = os.getcwd() + '\\Data'
 
-        with open('girotaskprojectcodes.dat', 'r') as file:
-            for line in file:
+        if not os.path.exists(dataPath):
+            os.mkdir(dataPath)
 
-                if(line != ""):
-                    line_list = line.split(",")
+        self.initPathData(dataPath)
 
-                    projectGiroCode = line_list[0]
+        if not os.path.isfile(self.backlogData.filenameDutyData):
+            file = open(self.backlogData.filenameDutyData, 'w')
+            file.close()
 
-                    taskGiroCodelist = list()
-                    taskGiroCodelist = line_list[1:]
+        self.loadTasksData()
+        self.initCurrDuty()
 
-                    self.addNewProject(projectGiroCode, taskGiroCodelist)
+    def initPathData(self, iPathData):
 
-                else:
-                    break
+        self.backlogData.pathData = iPathData
+
+        self.initCurrDate()
+        self.initPathCurrWeekData()
+        self.initFilenameCurrDutyData()
+        self.initTasksPathData()
+        
+    def initCurrDate(self):
+
+        now = datetime.datetime.now()
+        self.backlogData.currDate = now.strftime("%Y-%m-%d")
+
+    def initPathCurrWeekData(self):
+
+        now = datetime.datetime.now().strftime("%Y-%m-%d")
+        mondayDateOfWeek = self.backlogData.currDuty.getMondayDateOfCurrWeek(now) 
+        self.backlogData.pathWeekData = self.backlogData.pathData + '\\' + mondayDateOfWeek
+
+        if not os.path.exists(self.backlogData.pathWeekData):
+            os.mkdir(self.backlogData.pathWeekData)
+
+    def initFilenameCurrDutyData(self):
+        
+        today = self.backlogData.currDate
+        self.backlogData.filenameDutyData = self.backlogData.pathWeekData + '\\' + \
+                                            today + '.dat'
+
+    def initTasksPathData(self):
+
+        self.backlogData.pathTasksData = self.backlogData.pathData + '\\' + \
+                                         'tasksData.dat'
+
+    def loadTasksData(self):
+
+        dutyDataExist = os.path.isfile(self.backlogData.pathTasksData)
+        if not dutyDataExist:
+            file = open(self.backlogData.pathTasksData, 'w')
+            file.close()
+        
+        file = open(self.backlogData.pathTasksData, 'r')
+        for line in file:
+
+            if(line != ""):
+                line = line.split(";")
+
+                taskId = line[0]
+                taskProjectCode = line[1]
+                taskTitle = line[2]
+                completedTime = int(line[3].rstrip('\n'))
+
+                self.addNewTask(taskId, taskProjectCode, taskTitle, completedTime)
+
+            else:
+                break
         file.close()
-    
-    def loadGiroTFSData(self):
 
-        with open('giroTFS.dat', 'r') as file:
-            for line in file:
+    def loadDutyData(self, iDate, iDuty):
 
-                if(line != ""):
-                    line_list = line.split(",")
+        dutyDataExist = os.path.isfile(self.backlogData.pathTasksData)
+        if not dutyDataExist:
+            file = open(self.backlogData.pathTasksData, 'w+')
+            file.close()
 
-                    tfsCode = line_list[0]
-                    tfsDescription = line_list[1]
-                    tfsProjectCode = line_list[2]
-                    tfsTaskCode = line_list[3].split('\n')[0]
+        file = open(self.backlogData.filenameDutyData,'r')
+        for line in file:
+            if line != '\n':
+                lineSplit = line.split(';')
 
-                    self.addNewTFSTask(tfsCode, tfsDescription, tfsProjectCode, tfsTaskCode)
-        file.close()
+                taskId = lineSplit[0]
+                taskPrjCode = lineSplit[1]
+                title = lineSplit[2]
 
-    def loadDuty(self, iDate, iDuty):
+                currDtyDate = self.backlogData.currDuty.date
+                formatDateTime = '%Y-%m-%d %H:%M:%S'
 
-        duty = Duty()
-        folderNameDuty = duty.computeMondayDateWeek(iDate)
+                startTime = datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[4],  formatDateTime)
+                endTime =   datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[5].rstrip('\n'),  formatDateTime)
 
-        path = folderNameDuty + '\\' + iDate.strftime("%Y-%m-%d") 
-
-        with open(path,'r') as file:
-            for line in file:
-
-                lineSplit = line.split(',')
-
-                prjCode = lineSplit[0]
-                taskCode = lineSplit[1]
-                tfsTaskCode = lineSplit[2]
-                desc = lineSplit[3]
-                date = lineSplit[4]
-                startTime = lineSplit[5]
-                endTime = lineSplit[6]
-                dTime = lineSplit[7]
-
-                
-
-                newPiece = Piece()
+                newTask = Task(taskPrjCode, title, taskId)
+                newPiece = Piece(newTask, startTime, endTime)
 
                 iDuty.addPiece(newPiece)
 
-    
-    def addNewProject(self, projectCodeGiro, taskGiroCodelist):
+        file.close()
 
-        self.backlogData.projectGirolist.append(ProjectGiro(projectCodeGiro))
-        self.backlogData.projectGirolist[-1].addTasksFromCodes(taskGiroCodelist)
+    def initCurrDuty(self):
+
+        currDate = self.backlogData.currDate
+        self.loadDutyData(currDate, self.backlogData.currDuty)
     
-    def addNewTFSTask(self, tfsCode, tfsDescription, tfsProjectCode, tfsTaskCode):
+    def addNewTask(self, iId, iPrjCode, iTitle, iCompletedTime = 0):
         
-        isProjFound, projIndex = self.isProjectExist(tfsProjectCode)
+        newTask = Task(iPrjCode, iTitle, iId)
+        newTask.addCompletedTime(iCompletedTime)
 
-        if isProjFound:
+        if not self.isTaskAlreadyExist(newTask):
+            self.backlogData.tasks.append(newTask)
 
-            isTaskFound, indexTask = self.isTaskInProjectExist(tfsProjectCode, tfsTaskCode)
+    def addPieceToCurrDuty(self, iPiece):
 
-            if isTaskFound:
+        self.backlogData.currDuty.addPiece(iPiece)
 
-                projectToAdd = self.backlogData.projectGirolist[projIndex]
-                taskToAdd =   projectToAdd.taskGiroList[indexTask]
+        taskBacklog = self.isTaskAlreadyExist(iPiece.task)
+        taskBacklog.completedTime += iPiece.task.completedTime
 
-                self.backlogData.taskTFSGirolist.append(TFSTask(tfsCode, \
-                                                                tfsDescription, \
-                                                                projectToAdd, \
-                                                                taskToAdd))
-    
-    def createPiece(self, iTaskTFS, iStartDateTime, iEndDateTime):
+    def isTaskAlreadyExist(self, iTask):
 
-        newPiece = Piece(iTaskTFS, iStartDateTime, iEndDateTime)
+        alreadyExist = False
 
-        iTaskTFS.addCompletedTime(newPiece.deltaTime)
+        for currTask in self.backlogData.tasks:
+            if iTask.id == currTask.id:
+                return currTask
+            else:
+                if iTask.id == "":
+                    if iTask.title == currTask.title and \
+                        iTask.prjCode == currTask.prjCode:
+                        return currTask
+                    else: 
+                        continue
+                else:
+                    continue
 
-        self.backlogData.currDuty.addPiece(newPiece)
-        #self.backlogData.pieces.append(newPiece)
+        return alreadyExist
 
-        self.savePieceToDutyFile(self.backlogData.currDuty, newPiece)
+    def writePieceToDutyData(self, iPiece):
+        
+        dty = Duty()
 
+        pceDate = iPiece.startDateTime.strftime("%Y-%m-%d")
+        pceDateMondayWeek = dty.getMondayDateOfCurrWeek(iPiece.startDateTime.strftime("%Y-%m-%d"))
 
-    def savePieceToDutyFile(self, duty, pce):
+        filePath = self.backlogData.pathData + '\\' + \
+                   pceDateMondayWeek + '\\' + \
+                   pceDate + '.dat'
 
-        weekDateString = duty.mondayDateCurrWeek.strftime("%Y-%m-%d") 
-
-        if not os.path.exists('week_' + weekDateString):
-            os.makedirs('week_' + weekDateString)
+        if not os.path.exists(filePath):
+            os.makedirs(filePath)
 
         s = ""
 
-        s += str(pce.tfsTask.projectGiro.code)
-        s += ","
-        s += str(pce.tfsTask.taskGiro.code)
-        s += ","
-        s += str(pce.tfsTask.code)
-        s += ","
-        s += str(pce.tfsTask.description)
-        s += ","
-        s += str(pce.startDateTime.strftime("%Y-%m-%d"))
-        s += ","
-        s += str(pce.startDateTime.strftime("%H:%M:%S"))
-        s += ","
-        s += str(pce.endDateTime.strftime("%H:%M:%S"))
-        s += ","
-        s += str(pce.deltaTime)
+        s += str(iPiece.task.id)
+        s += ";"
+        s += str(iPiece.task.prjCode)
+        s += ";"
+        s += str(iPiece.task.title)
+        s += ";"
+        s += str(iPiece.task.completedTime)
+        s += ";"
+        s += str(iPiece.startDateTime.strftime("%H:%M:%S"))
+        s += ";"
+        s += str(iPiece.endDateTime.strftime("%H:%M:%S"))
         s += '\n'
 
-        dutyDateStringFormat = duty.date.strftime("%Y-%m-%d") 
-
-        with open('week_' + weekDateString + '\\duty_' + dutyDateStringFormat + '.dat', "a") as file:
+        with open(filePath, "a") as file:
             file.write(s)
             file.close()
 
+    def writeTasksData(self):
 
-    def isProjectExist(self, iProjectCode):
+        filePath = self.backlogData.pathData + '\\' + 'tasksData.dat'
 
-        isFound = False
-        index = 0
-        for index, project in enumerate(self.backlogData.projectGirolist):
-            
-            if project.code == iProjectCode:
-                isFound = True
-                break
+        if not os.path.exists(filePath):
+            os.makedirs(filePath)
 
-        return isFound, index
+        s = ""
 
-    def isTaskInProjectExist(self, iProjectCode, iTaskCode):
+        for currTask in self.backlogData.tasks:
 
-        isFound = False
-        isProjectFound, index = self.isProjectExist(iProjectCode)
+            s += str(currTask.id)
+            s += ';'
+            s += str(currTask.prjCode)
+            s += ';'
+            s += str(currTask.title)
+            s += ';'
+            s += str(int(currTask.completedTime))
+            s += '\n'
 
-        if isProjectFound and index >= 0:
-
-            for index, task in enumerate(self.backlogData.projectGirolist[index].taskGiroList):
-                if task.code == iTaskCode:
-                    isFound = True
-                    break
- 
-        return isFound, index
+        with open(filePath, "w") as file:
+            file.write(s)
+            file.close()
     
-    def getTFSTasks(self):
-        return self.backlogData.taskTFSGirolist
+    def initCurrTask(self):
+        self.backlogData.currtask = Task()
 
-    def setCurrentTFSTask(self, iIndex):
+
+    def startPiece(self):
+        now = datetime.datetime.now()
         
-        tfsTaskList = self.backlogData.taskTFSGirolist
+        self.backlogData.currPiece = Piece(self.backlogData.currTask, now)        
 
-        if iIndex >= 0 and iIndex < len(tfsTaskList):
-            self.backlogData.currTFSTask = self.backlogData.taskTFSGirolist[iIndex]
+        self.backlogData.isTimerRunning = True
 
-            self.backlogData.currProjectCode = self.backlogData.currTFSTask.projectGiro.code
-            self.backlogData.currTaskCode = self.backlogData.currTFSTask.taskGiro.code
+    def endPiece(self):
 
-    def getCurrentTaskCode(self):
-        return self.backlogData.currTaskCode
+        now = datetime.datetime.now()
 
-    def getCurrentProjectCode(self):
-        return self.backlogData.currProjectCode
+        self.backlogData.currPiece.setEndDateTime(now)
+        self.addPieceToCurrDuty(self.backlogData.currPiece)
 
+        self.writePieceToDutyData(self.backlogData.currPiece)
+        self.writeTasksData()
 
-    def createTimeSheet(self, weekDateString):
+        self.backlogData.isTimerRunning = False
 
-        folderPath = 'week_' + weekDateString
-        files = []
-        tasksToLog = []
+    def setCurrentTaskFromGUI(self, iComboboxText):
+        
+        split_cbboxText = iComboboxText.split(';')
 
-        if os.path.exists(folderPath):
+        currTaskId = split_cbboxText[0]
+
+        self.backlogData.currTask = self.getTaskFromId(currTaskId)
+ 
+
+    def getListTasksFromGUI(self):
+
+        cbboxElmDesclist = list()
+
+        for task in self.backlogData.tasks:
+            cbboxElmDesc = ''
+
+            if task.id:
+                cbboxElmDesc = task.id + ';' + \
+                               task.title        
+            else:
+                cbboxElmDesc = task.prjCode + ';' + \
+                               task.title
+                               
+            cbboxElmDesclist.append(cbboxElmDesc)
             
-            for r,d,f in os.walk(folderPath):
-                for file in f:
-                    if '.dat' in file:
-                        files.append(os.path.join(r,file))
+        return cbboxElmDesclist
 
-        for dutyDateFilename in files:
-            with open (dutyDateFilename, 'r') as file:
-                for pieceData in file:
+    def getCurrDutyTimeCompletedFromGUI(self):
 
-                    pieceDataSplit = pieceData.split(',')
+        secCompleted = self.backlogData.currDuty.totalTimeCompleted
+        return str(datetime.timedelta(seconds = secCompleted))
 
-                    currPrjCode = pieceDataSplit[0]
-                    currTaskCode = pieceDataSplit[1]
-                    currTaskTFSCode = pieceDataSplit[2]
-                    currDescription = pieceDataSplit[3]
-                    currTimeCompleted = pieceDataSplit[7]
+    def getCompletedTimeCurrTaskFromGUI(self):
 
-            
-            print(tasksToLog[0])
+        secCompleted = self.backlogData.currTask.completedTime
+        return str(datetime.timedelta(seconds = secCompleted))
+
+    def manageClickButtonFromGUI(self, iCbboxText):
+
+        currTaskId = iCbboxText.split(';')[0]
+        self.backlogData.currTask = self.getTaskFromId(currTaskId)
+
+        if self.backlogData.currTask.id != '':
+            if not self.backlogData.isTimerRunning:
+                self.startPiece()
+            else:
+                self.endPiece()
+            return True
+        else:
+            return False
+
+    def getTaskFromId(self, iId):
+
+        for currTask in self.backlogData.tasks:
+            if currTask.id == iId:
+                return copy.copy(currTask)
+            else:
+                continue
+
+        emptyTask = Task()  
+        return emptyTask
+
+'''
+    def manageOpenEventFromGUI(self):
+        self.initCurrDuty()
+        
+
+    def manageCloseEventFromGUI(self):
+        print("end")
+
+
+    def getCurrPrjCodeGUI(self):
+        split_res = self.backlogData.currTask.prjCode.split('-')[0]
+        return split_res
+
+    def getCurrTaskFromGUI(self):
+        split_res = self.backlogData.currTask.prjCode.split('-')[1:]
+        return split_res
 
 
 
-                    
-
-
-                
-
+'''                  

@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication, QWidget, QLabel, QLineEdit, QPushButton, QDialog,QComboBox)
+from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication, QWidget, QLabel, QLineEdit, QPushButton, QDialog, QComboBox, QMessageBox)
 from PyQt5.QtCore import QTimer, QTime, QSettings
 from PyQt5.QtGui import QIcon
 
@@ -16,13 +16,8 @@ class MainWindow(QWidget):
 
     def __init__(self):
         super().__init__()
-
-        #Backlog Data Object
-
-        #Backlog data init
+        
         self.backlogMgr = BacklogMgr()
-        self.backlogMgr.loadGiroTaskProjectCodesData()
-        self.backlogMgr.loadGiroTFSData()
 
         self.initUI()
 
@@ -41,18 +36,7 @@ class MainWindow(QWidget):
         self.btnAddTfsTask.setIcon(QIcon('plus_icon.png'))
         self.btnAddTfsTask.clicked.connect(self.manageAddTFSTaskEvent)
 
-        self.btnAddProject = QPushButton('', self)
-        self.btnAddProject.setIcon(QIcon('plus_icon.png'))
-
-        self.btnAddTask = QPushButton('', self)
-        self.btnAddTask.setIcon(QIcon('plus_icon.png'))
-
-        self.taskTFSLabel = QLabel('Task Code TFS:')
-        self.projectCodeLabel = QLabel('Project Code:')
-        self.taskCodeLabel = QLabel('Task Code:')
-
-        self.projectCodeInput = QLineEdit('')
-        self.taskCodeInput = QLineEdit('')
+        self.dutyTimeCompLbl = QLabel()        
 
         self.taskTFSCb = QComboBox(self)
         self.initTFSTaskCombobox()
@@ -64,95 +48,104 @@ class MainWindow(QWidget):
 
         fieldsInputLayout = QHBoxLayout()
 
-        layoutLabelsCodes = QVBoxLayout()
-        layoutLabelsCodes.addWidget(self.taskTFSLabel)
-        layoutLabelsCodes.addWidget(self.projectCodeLabel)
-        layoutLabelsCodes.addWidget(self.taskCodeLabel)
-
         layoutInputCodes = QVBoxLayout()
         layoutInputCodes.addWidget(self.taskTFSCb)
-        layoutInputCodes.addWidget(self.projectCodeInput)
-        layoutInputCodes.addWidget(self.taskCodeInput)
+
 
         layoutAddBtn = QVBoxLayout()
         layoutAddBtn.addWidget(self.btnAddTfsTask)
-        layoutAddBtn.addWidget(self.btnAddProject)
-        layoutAddBtn.addWidget(self.btnAddTask)
 
-        fieldsInputLayout.addLayout(layoutLabelsCodes)
         fieldsInputLayout.addLayout(layoutInputCodes)
         fieldsInputLayout.addLayout(layoutAddBtn)
+
+        layoutDutyStat = QHBoxLayout()
+        layoutDutyStat.addWidget(self.dutyTimeCompLbl)
 
         mainLayout.addLayout(layoutTimer)
         mainLayout.addLayout(fieldsInputLayout)
         mainLayout.addWidget(self.btnStartPause)
+        mainLayout.addLayout(layoutDutyStat)
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.updateLcdNumberContent)
-        self.timer.start(1000)
-        self.timer.stop()
-        
-        self.currentTime = QTime(0,0,0)
-        self.lcdNumber.display(self.currentTime.toString('hh:mm:ss'))
+        self.currTimeLCD = QTime(0,0,0)
+        self.currTimeDuty = QTime(0,0,0)
+
+        self.timer.timeout.connect(self.incrementTimer)
+
+        self.updateTimeLCD()
+        self.updateDutyTimeDisp()
 
         self.startTime = 0
         self.stopTime = 0
-        
+ 
     def initTFSTaskCombobox(self):
 
-        taskTFSGirolist = self.backlogMgr.getTFSTasks()
+        taskTFSGirolist = self.backlogMgr.getListTasksFromGUI()
 
-        for taskTFS in taskTFSGirolist:
-            self.taskTFSCb.addItem(taskTFS.code + " - " + taskTFS.description)
-        
-        self.manageCbTFSIndexChange()
+        for taskDesc in taskTFSGirolist:
+            self.taskTFSCb.addItem(taskDesc)
+
+        firstText = self.taskTFSCb.currentText()
+        self.backlogMgr.setCurrentTaskFromGUI(firstText)
 
         self.taskTFSCb.currentIndexChanged.connect(self.manageCbTFSIndexChange)
 
     def manageCbTFSIndexChange(self):
 
-        index = self.taskTFSCb.currentIndex()
+        currText = self.taskTFSCb.currentText()
+        self.backlogMgr.setCurrentTaskFromGUI(currText)
 
-        self.backlogMgr.setCurrentTFSTask(index)
+        self.updateTimeLCD()
 
-        self.projectCodeInput.setText(self.backlogMgr.getCurrentProjectCode())
-        self.taskCodeInput.setText(self.backlogMgr.getCurrentTaskCode())
+    def updateTimeLCD(self):
 
-    def updateLcdNumberContent(self):
+        currTaskTime_split = self.backlogMgr.getCompletedTimeCurrTaskFromGUI().split(':')
 
-        self.currentTime = self.currentTime.addSecs(1)
-        self.lcdNumber.display(self.currentTime.toString('hh:mm:ss'))
+        h = int(currTaskTime_split[0])
+        m = int(currTaskTime_split[1])
+        s = int(currTaskTime_split[2])
+
+        self.currTimeLCD = QTime(h,m,s)
+        self.lcdNumber.display(self.currTimeLCD.toString('hh:mm:ss'))
+
+    def updateDutyTimeDisp(self):
+
+        currTaskTime_split = self.backlogMgr.getCurrDutyTimeCompletedFromGUI().split(':')
+
+        h = int(currTaskTime_split[0])
+        m = int(currTaskTime_split[1])
+        s = int(currTaskTime_split[2])
+
+        self.currTimeDuty = QTime(h,m,s)
+        self.dutyTimeCompLbl.setText('Daily time completed: ' + self.currTimeDuty.toString('hh:mm:ss'))
+
+    def incrementTimer(self):
+
+        self.currTimeLCD = self.currTimeLCD.addSecs(1)
+        self.lcdNumber.display(self.currTimeLCD.toString('hh:mm:ss'))
+
+        self.currTimeDuty = self.currTimeDuty.addSecs(1)
+        self.dutyTimeCompLbl.setText('Daily time completed: ' + self.currTimeDuty.toString('hh:mm:ss'))
 
     def manageStartPauseClickedEvent(self):
 
+        currText = self.taskTFSCb.currentText()
+        self.backlogMgr.manageClickButtonFromGUI(currText)
+
         if self.timer.isActive():
             self.timer.stop()
-            #self.stopTime = self.currentTime.toString('hh:mm:ss')
+
             self.btnStartPause.setIcon(QIcon('play_icon.png'))
 
-            self.stopTime = datetime.datetime.now()
-
-            self.backlogMgr.createPiece(self.backlogMgr.backlogData.currTFSTask, \
-                                        self.startTime, \
-                                        self.stopTime)
-
             self.taskTFSCb.setEnabled(True)
-            self.projectCodeInput.setEnabled(True)
-            self.taskCodeInput.setEnabled(True)
-            #self.printStatus()
 
         else:
-            self.timer.start()
-            self.startTime = datetime.datetime.now()
+            self.timer.start(1000)
 
             self.btnStartPause.setIcon(QIcon('pause_icon.png'))
 
-            self.backlogMgr.createTimeSheet('2020-04-13')
- 
             self.taskTFSCb.setEnabled(False)
-            self.projectCodeInput.setEnabled(False)
-            self.taskCodeInput.setEnabled(False)
-        
+
     def manageAddTFSTaskEvent(self):
 
         ex = AddTFSTaskWindow(self)
@@ -161,35 +154,6 @@ class MainWindow(QWidget):
     def closeEvent(self, event):
 
         event.accept()
-
-    def printStatus(self):
-        
-        print("Current task TFS time completed:")
-        print(self.backlogMgr.backlogData.currTFSTask.completedTime)
-
-        print("\n")
-        print("All pieces completed time:")
-        for i,pce in enumerate(self.backlogMgr.backlogData.pieces):
-            print(pce.deltaTime)
-
-        print("\n")
-
-        print("All tasks TFS in backlog time completed:")
-        for i,task in enumerate(self.backlogMgr.backlogData.taskTFSGirolist):
-            print(task.completedTime)
-
-        print("\n")
-
-        print("All backlog Information time completed:")
-        for i,prj in enumerate(self.backlogMgr.backlogData.projectGirolist):
-
-            print(str(prj.code) + ":")
-
-            for j,task in enumerate(self.backlogMgr.backlogData.projectGirolist[i].taskGiroList):
-                print(str(task.completedTime) + " ")
-
-            print("\n")
-
 
 if __name__ == '__main__':
 
