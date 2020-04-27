@@ -78,9 +78,10 @@ class BacklogMgr():
                 taskId = line[0]
                 taskProjectCode = line[1]
                 taskTitle = line[2]
-                completedTime = int(line[3].rstrip('\n'))
+                completedTime = int(line[3])
+                estimatedTime = str(line[4].rstrip('\n'))
 
-                self.addNewTask(taskId, taskProjectCode, taskTitle, completedTime)
+                self.addNewTask(taskId, taskProjectCode, taskTitle, completedTime, estimatedTime)
 
             else:
                 break
@@ -120,10 +121,11 @@ class BacklogMgr():
         currDate = self.backlogData.currDate
         self.loadDutyData(currDate, self.backlogData.currDuty)
     
-    def addNewTask(self, iId, iPrjCode, iTitle, iCompletedTime = 0):
+    def addNewTask(self, iId, iPrjCode, iTitle, iCompletedTime = 0, iEstimatedTime = ""):
         
         newTask = Task(iPrjCode, iTitle, iId)
         newTask.addCompletedTime(iCompletedTime)
+        newTask.setEstimatedTime(iEstimatedTime)
 
         if not self.isTaskAlreadyExist(newTask):
             self.backlogData.tasks.append(newTask)
@@ -205,6 +207,8 @@ class BacklogMgr():
             s += str(currTask.title)
             s += ';'
             s += str(int(currTask.completedTime))
+            s += ';'
+            s += str(datetime.timedelta(currTask.estimatedTime))
             s += '\n'
 
         with open(filePath, "w") as file:
@@ -295,24 +299,4 @@ class BacklogMgr():
 
         emptyTask = Task()  
         return emptyTask
-
-'''
-    def manageOpenEventFromGUI(self):
-        self.initCurrDuty()
-        
-
-    def manageCloseEventFromGUI(self):
-        print("end")
-
-
-    def getCurrPrjCodeGUI(self):
-        split_res = self.backlogData.currTask.prjCode.split('-')[0]
-        return split_res
-
-    def getCurrTaskFromGUI(self):
-        split_res = self.backlogData.currTask.prjCode.split('-')[1:]
-        return split_res
-
-
-
-'''                  
+       

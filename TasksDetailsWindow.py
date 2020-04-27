@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import (QFormLayout, QApplication, QWidget, QDialog, QTextE
 from BacklogData import *
 from Task import *
 
-class DutyDetailsWindow(QDialog):
+class TasksDetailsWindow(QDialog):
 
     def __init__(self, parent, iBacklogData):
         super().__init__(parent)
@@ -15,37 +15,33 @@ class DutyDetailsWindow(QDialog):
         self.textEdit = QTextEdit(self)
         self.textEdit.setReadOnly(True)
         self.doInit()
-
+        
         self.textEdit.autoFormatting()
 
         mainLayout.addWidget(self.textEdit)
 
     def doInit(self):        
 
-        taskRegInDutyText = self.genTaskRegisteredString()
-        self.textEdit.setText(taskRegInDutyText)
+        taskSummaryText = self.genTasksString()
+        self.textEdit.setText(taskSummaryText)
 
-    def genTaskRegisteredString(self):
-        
-        currDate = self.backlogData.currDuty.date
+    def genTasksString(self):
 
-        s = 'Time to log for the ' + currDate + ':\n'
+        s = 'Tasks summary:\n'
         s += '\n'
 
-        for currTask in self.backlogData.currDuty.tasksRegistered:
+        for currTask in self.backlogData.tasks:
 
             s += currTask.id
             s += ' - '
             s += currTask.prjCode
             s += ' - '
             s += currTask.title
-            s += ': '
-            s += str(datetime.timedelta(seconds = currTask.completedTime))
             s += '\n'
-
-        s += '\n'
-        s += 'Total time completed: '
-        s += str(datetime.timedelta(seconds = self.backlogData.currDuty.totalTimeCompleted))
+            s += 'Time logged: ' + str(datetime.timedelta(seconds = currTask.completedTime)) + '\n'
+            s += 'Estimated Time: ' + str(datetime.timedelta(seconds = currTask.estimatedTime)) + '\n'
+            s += 'Completion ratio: ' + str(currTask.completionRatio) + '%\n'
+            s += '\n'
 
         return s
 

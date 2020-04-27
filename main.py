@@ -6,6 +6,8 @@ from PyQt5.QtGui import QIcon
 
 from AddTFSTaskWindow import *
 from DutyDetailsWindow import *
+from TasksDetailsWindow import *
+
 import datetime
 
 from BacklogMgr import *
@@ -35,6 +37,9 @@ class MainWindow(QWidget):
 
         self.btnDutyDetails = QPushButton('Duty details...')
         self.btnDutyDetails.clicked.connect(self.manageDutyDetailsClickedEvent)
+
+        self.btnTasksDetails = QPushButton('Tasks details...')
+        self.btnTasksDetails.clicked.connect(self.manageTaskDetailsClickedEvent)
         
         self.btnAddTfsTask = QPushButton('', self)
         self.btnAddTfsTask.setIcon(QIcon('plus_icon.png'))
@@ -69,6 +74,7 @@ class MainWindow(QWidget):
         mainLayout.addLayout(fieldsInputLayout)
         mainLayout.addWidget(self.btnStartPause)
         mainLayout.addWidget(self.btnDutyDetails)
+        mainLayout.addWidget(self.btnTasksDetails)
         mainLayout.addLayout(layoutDutyStat)
 
         self.timer = QTimer(self)
@@ -83,7 +89,7 @@ class MainWindow(QWidget):
         self.startTime = 0
         self.stopTime = 0
 
- 
+
     def initTFSTaskCombobox(self):
 
         taskTFSGirolist = self.backlogMgr.getListTasksFromGUI()
@@ -157,6 +163,11 @@ class MainWindow(QWidget):
     def manageDutyDetailsClickedEvent(self):
 
         ex = DutyDetailsWindow(self, self.backlogMgr.backlogData)
+        ex.show()
+
+    def manageTaskDetailsClickedEvent(self):
+        
+        ex = TasksDetailsWindow(self, self.backlogMgr.backlogData)
         ex.show()
     
     def manageAddTFSTaskEvent(self):
