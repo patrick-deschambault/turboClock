@@ -208,7 +208,7 @@ class BacklogMgr():
             s += ';'
             s += str(int(currTask.completedTime))
             s += ';'
-            s += str(datetime.timedelta(currTask.estimatedTime))
+            s += str(datetime.timedelta(seconds = currTask.estimatedTime))
             s += '\n'
 
         with open(filePath, "w") as file:
