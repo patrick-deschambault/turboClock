@@ -1,34 +1,64 @@
 
-from PyQt5.QtWidgets import (QFormLayout, QApplication, QWidget, QLabel, QLineEdit, QDialogButtonBox, QDialog)
-
+from PyQt5.QtWidgets import (QFormLayout, QApplication, QWidget, QLabel, QLineEdit, QDialogButtonBox, QDialog, QHBoxLayout, QVBoxLayout, QListWidget)
 
 class EditTasksOptions(QDialog):
 
-    def __init__(self, parent):
+    def __init__(self, parent, iBacklogMgr):
         super().__init__(parent)
+
+        self.backlogMgr = iBacklogMgr
+
+        self.data = iBacklogMgr.backlogData
+
+        self.currTaskListView = ''
 
         self.initUI()
 
     def initUI(self):
 
-        self.setWindowTitle("Create new TFS task")
+        self.setWindowTitle("Edit tasks")
 
-        self.codeInput = QLineEdit(self)
-        self.descInput = QLineEdit(self)
-        self.projectCodeInput = QLineEdit(self)
-        self.taskCodeInput = QLineEdit(self)
+        mainLayout =  QVBoxLayout(self)
+        listViewTaskViewLayout = QHBoxLayout()
+
+        self.listTasksView = QListWidget(self)
+
+        for currTask in self.data.tasks:
+            
+            currId = currTask.id
+            currTitle = currTask.title
+
+            textItem = currId + ' - ' + currTitle
+
+            self.listTasksView.addItem(textItem)
+
+        self.listTasksView.currentItemChanged.connect(self.manageCurrItemChangeTaskList)
         
-        buttonBox = QDialogButtonBox(self)
-        buttonBox.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
+        self.idInput = QLineEdit(self)
+        self.titleInput = QLineEdit(self)
+        self.prjCodeInput = QLineEdit(self)
+        self.completedTime = QLineEdit(self)
 
-        layout = QFormLayout(self)
-        layout.addRow("Code:", self.codeInput)
-        layout.addRow("Description:", self.descInput)
-        layout.addRow("Project code:", self.projectCodeInput)
-        layout.addRow("Task code:", self.taskCodeInput)
-        layout.addWidget(buttonBox)
+        layoutCurrTask = QFormLayout()
+        layoutCurrTask.addRow("Id:", self.idInput)
+        layoutCurrTask.addRow("Title:", self.titleInput)
+        layoutCurrTask.addRow("Project code:", self.prjCodeInput)
+        layoutCurrTask.addRow("Completed time:", self.completedTime)
 
-        buttonBox.accepted.connect(self.accept)
-        buttonBox.rejected.connect(self.reject)
+        listViewTaskViewLayout.addWidget(self.listTasksView)
+        listViewTaskViewLayout.addLayout(layoutCurrTask)
 
-        
+        mainLayout.addLayout(listViewTaskViewLayout)
+ 
+
+    def manageCurrItemChangeTaskList(self):
+
+        currItemIndex = self.listTasksView.currentRow()
+
+        self.currTaskListView = self.data.tasks[currItemIndex]
+
+        self.idInput.setText(self.currTaskListView.id)
+        self.titleInput.setText(self.currTaskListView.title)
+        self.prjCodeInput.setText(self.currTaskListView.prjCode)
+        self.completedTime.setText(str(self.currTaskListView.completedTime))
+

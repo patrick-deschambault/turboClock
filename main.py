@@ -162,7 +162,7 @@ class MainWindow(QWidget):
     
     def manageEditTasksOptions(self):
 
-        ex = EditTasksOptions(self)
+        ex = EditTasksOptions(self, self.backlogMgr)
         ex.show()
 
     def closeEvent(self, event):
