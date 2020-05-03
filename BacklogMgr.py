@@ -238,14 +238,12 @@ class BacklogMgr():
 
         self.backlogData.isTimerRunning = False
 
-    def setCurrentTaskFromGUI(self, iComboboxText):
-        
-        split_cbboxText = iComboboxText.split(';')
+    def setCurrentTaskFromGUI(self, iIndexCbb):
 
-        currTaskId = split_cbboxText[0]
-
-        self.backlogData.currTask = self.getTaskFromId(currTaskId)
- 
+        try:
+            self.backlogData.currTask = self.backlogData.tasks[iIndexCbb]
+        except:
+            print("Error: index must be a strictly positive integer")
 
     def getListTasksFromGUI(self):
 
@@ -275,19 +273,22 @@ class BacklogMgr():
         secCompleted = self.backlogData.currTask.completedTime
         return str(datetime.timedelta(seconds = secCompleted))
 
-    def manageClickButtonFromGUI(self, iCbboxText):
+    def manageClickButtonFromGUI(self):
 
-        currTaskId = iCbboxText.split(';')[0]
-        self.backlogData.currTask = self.getTaskFromId(currTaskId)
-
-        if self.backlogData.currTask.id != '':
+        if self.backlogData.currTask:
             if not self.backlogData.isTimerRunning:
                 self.startPiece()
             else:
                 self.endPiece()
-            return True
+
+    def manageTaskChangeFromGUI(self, iCbbIndex):
+
+        if self.backlogData.isTimerRunning:
+            self.endPiece()
+            self.setCurrentTaskFromGUI(iCbbIndex)
+            self.startPiece()
         else:
-            return False
+            self.setCurrentTaskFromGUI(iCbbIndex)
 
     def getTaskFromId(self, iId):
 

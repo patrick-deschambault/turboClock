@@ -2,7 +2,7 @@
 from PyQt5.QtWidgets import (QFormLayout, QApplication, QWidget, QLabel, QLineEdit, QDialogButtonBox, QDialog)
 
 
-class AddTFSTaskWindow(QDialog):
+class EditTasksOptions(QDialog):
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -17,6 +17,7 @@ class AddTFSTaskWindow(QDialog):
         self.descInput = QLineEdit(self)
         self.projectCodeInput = QLineEdit(self)
         self.taskCodeInput = QLineEdit(self)
+        
         buttonBox = QDialogButtonBox(self)
         buttonBox.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)
 

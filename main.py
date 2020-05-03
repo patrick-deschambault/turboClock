@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication,
 from PyQt5.QtCore import QTimer, QTime, QSettings
 from PyQt5.QtGui import QIcon
 
-from AddTFSTaskWindow import *
+from EditTasksOptions import *
 from DutyDetailsWindow import *
 from TasksDetailsWindow import *
 
@@ -43,7 +43,7 @@ class MainWindow(QWidget):
         
         self.btnAddTfsTask = QPushButton('', self)
         self.btnAddTfsTask.setIcon(QIcon('plus_icon.png'))
-        self.btnAddTfsTask.clicked.connect(self.manageAddTFSTaskEvent)
+        self.btnAddTfsTask.clicked.connect(self.manageEditTasksOptions)
 
         self.dutyTimeCompLbl = QLabel()        
 
@@ -59,7 +59,6 @@ class MainWindow(QWidget):
 
         layoutInputCodes = QVBoxLayout()
         layoutInputCodes.addWidget(self.taskTFSCb)
-
 
         layoutAddBtn = QVBoxLayout()
         layoutAddBtn.addWidget(self.btnAddTfsTask)
@@ -89,7 +88,6 @@ class MainWindow(QWidget):
         self.startTime = 0
         self.stopTime = 0
 
-
     def initTFSTaskCombobox(self):
 
         taskTFSGirolist = self.backlogMgr.getListTasksFromGUI()
@@ -97,15 +95,16 @@ class MainWindow(QWidget):
         for taskDesc in taskTFSGirolist:
             self.taskTFSCb.addItem(taskDesc)
 
-        firstText = self.taskTFSCb.currentText()
-        self.backlogMgr.setCurrentTaskFromGUI(firstText)
+        currIndex = self.taskTFSCb.currentIndex()
+        self.backlogMgr.setCurrentTaskFromGUI(currIndex)
 
         self.taskTFSCb.currentIndexChanged.connect(self.manageCbTFSIndexChange)
 
     def manageCbTFSIndexChange(self):
 
-        currText = self.taskTFSCb.currentText()
-        self.backlogMgr.setCurrentTaskFromGUI(currText)
+        currIndex = self.taskTFSCb.currentIndex()
+
+        self.backlogMgr.manageTaskChangeFromGUI(currIndex)
 
         self.updateTimeLCD()
 
@@ -141,24 +140,15 @@ class MainWindow(QWidget):
 
     def manageStartPauseClickedEvent(self):
 
-        currText = self.taskTFSCb.currentText()
-        self.backlogMgr.manageClickButtonFromGUI(currText)
+        self.backlogMgr.manageClickButtonFromGUI()
 
         if self.timer.isActive():
             self.timer.stop()
-
             self.btnStartPause.setIcon(QIcon('play_icon.png'))
-
-            self.taskTFSCb.setEnabled(True)
-            self.btnDutyDetails.setEnabled(True)
 
         else:
             self.timer.start(1000)
-
             self.btnStartPause.setIcon(QIcon('pause_icon.png'))
-
-            self.taskTFSCb.setEnabled(False)
-            self.btnDutyDetails.setEnabled(False)
 
     def manageDutyDetailsClickedEvent(self):
 
@@ -170,9 +160,9 @@ class MainWindow(QWidget):
         ex = TasksDetailsWindow(self, self.backlogMgr.backlogData)
         ex.show()
     
-    def manageAddTFSTaskEvent(self):
+    def manageEditTasksOptions(self):
 
-        ex = AddTFSTaskWindow(self)
+        ex = EditTasksOptions(self)
         ex.show()
 
     def closeEvent(self, event):

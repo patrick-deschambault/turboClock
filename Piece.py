@@ -22,7 +22,7 @@ class Piece():
             self.computeDeltaTime()
 
     def setEndDateTime(self, iEndDateTime):
-
+        
         self.endDateTime = iEndDateTime
 
         if self.startDateTime:
