@@ -32,7 +32,7 @@ class MainWindow(QWidget):
         self.lcdNumber.setNumDigits(8)
 
         self.btnStartPause = QPushButton('', self)
-        self.btnStartPause.setIcon(QIcon('play_icon.png'))
+        self.btnStartPause.setIcon(QIcon('Images//play_icon.png'))
         self.btnStartPause.clicked.connect(self.manageStartPauseClickedEvent)
 
         self.btnDutyDetails = QPushButton('Duty details...')
@@ -42,7 +42,7 @@ class MainWindow(QWidget):
         self.btnTasksDetails.clicked.connect(self.manageTaskDetailsClickedEvent)
         
         self.btnAddTfsTask = QPushButton('', self)
-        self.btnAddTfsTask.setIcon(QIcon('plus_icon.png'))
+        self.btnAddTfsTask.setIcon(QIcon('Images//plus_icon.png'))
         self.btnAddTfsTask.clicked.connect(self.manageEditTasksOptions)
 
         self.dutyTimeCompLbl = QLabel()        
@@ -144,11 +144,11 @@ class MainWindow(QWidget):
 
         if self.timer.isActive():
             self.timer.stop()
-            self.btnStartPause.setIcon(QIcon('play_icon.png'))
+            self.btnStartPause.setIcon(QIcon('Images//play_icon.png'))
 
         else:
             self.timer.start(1000)
-            self.btnStartPause.setIcon(QIcon('pause_icon.png'))
+            self.btnStartPause.setIcon(QIcon('Images//pause_icon.png'))
 
     def manageDutyDetailsClickedEvent(self):
 

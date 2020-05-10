@@ -301,3 +301,9 @@ class BacklogMgr():
         emptyTask = Task()  
         return emptyTask
        
+    def manageAddTaskBacklogDataFromGUI(self):
+        print("")
+
+    def manageDeleteTaskBacklogDataFromGUI(self):
+        print("")
+
