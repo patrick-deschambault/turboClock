@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication,
 from PyQt5.QtCore import QTimer, QTime, QSettings
 from PyQt5.QtGui import QIcon
 
-from EditTasksOptions import *
+from EditTasksOptionsGUI import *
 from DutyDetailsWindow import *
 from TasksDetailsWindow import *
 
@@ -162,7 +162,7 @@ class MainWindow(QWidget):
     
     def manageEditTasksOptions(self):
 
-        ex = EditTasksOptions(self, self.backlogMgr)
+        ex = EditTasksOptionsGUI(self, self.backlogMgr)
         ex.show()
 
     def closeEvent(self, event):
