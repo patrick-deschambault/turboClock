@@ -4,6 +4,8 @@ from Task import *
 from Piece import *
 from Duty import *
 
+from enum import Enum
+
 class BacklogData:
 
      def __init__(self):
@@ -31,8 +33,6 @@ class BacklogData:
       self.pathData = ""
 
       self.currDate = ""
-
-
 
 
         

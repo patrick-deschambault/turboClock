@@ -6,6 +6,8 @@ import os
 
 from BacklogData import *
 
+from ErrorEnum import *
+
 class BacklogMgr():
 
     def __init__(self):
@@ -127,34 +129,41 @@ class BacklogMgr():
         newTask.addCompletedTime(iCompletedTime)
         newTask.setEstimatedTime(iEstimatedTime)
 
-        if not self.isTaskAlreadyExist(newTask):
+        if not self.getIndexTaskBacklogData(newTask):
             self.backlogData.tasks.append(newTask)
+        else:
+            return ErrorEnum.ERROR_TASK_ALREADY_EXIST
 
     def addPieceToCurrDuty(self, iPiece):
 
         self.backlogData.currDuty.addPiece(iPiece)
 
-        taskBacklog = self.isTaskAlreadyExist(iPiece.task)
-        taskBacklog.completedTime += iPiece.task.completedTime
+        index = self.getIndexTaskBacklogData(iPiece.task)
 
-    def isTaskAlreadyExist(self, iTask):
+        if index > 0:
+            taskBacklog = self.backlogData.tasks[index]
+            taskBacklog.completedTime += iPiece.task.completedTime
 
-        alreadyExist = False
+    def getIndexTaskBacklogData(self, iTask):
 
-        for currTask in self.backlogData.tasks:
+        index = None
+
+        for i, currTask in enumerate(self.backlogData.tasks):
             if iTask.id == currTask.id:
-                return currTask
+                index = i
+                break
             else:
                 if iTask.id == "":
                     if iTask.title == currTask.title and \
                         iTask.prjCode == currTask.prjCode:
-                        return currTask
+                        index = i
+                        break
                     else: 
                         continue
                 else:
                     continue
 
-        return alreadyExist
+        return index
 
     def writePieceToDutyData(self, iPiece):
         
@@ -217,7 +226,6 @@ class BacklogMgr():
     
     def initCurrTask(self):
         self.backlogData.currtask = Task()
-
 
     def startPiece(self):
         now = datetime.datetime.now()
@@ -289,21 +297,20 @@ class BacklogMgr():
             self.startPiece()
         else:
             self.setCurrentTaskFromGUI(iCbbIndex)
-
-    def getTaskFromId(self, iId):
-
-        for currTask in self.backlogData.tasks:
-            if currTask.id == iId:
-                return copy.copy(currTask)
-            else:
-                continue
-
-        emptyTask = Task()  
-        return emptyTask
        
-    def manageAddTaskBacklogDataFromGUI(self):
-        print("")
+    def manageAddTaskBacklogDataFromGUI(self, iId, iPrjCode, iTitle, iCompletedTime, iEstimatedTime):
+        
+        self.addNewTask(iId, iPrjCode, iTitle, iCompletedTime, iEstimatedTime)
 
-    def manageDeleteTaskBacklogDataFromGUI(self):
-        print("")
+    def manageDeleteTaskBacklogDataFromGUI(self, iId, iPrjCode, iTitle):
+        
+        self.deleteTaskBacklogData(iId, iPrjCode,iTitle)
 
+    def deleteTaskBacklogData(self, iId, iPrjCode, iTitle):
+
+        taskToDelete = Task(iPrjCode, iTitle, iId)
+
+        index = self.getIndexTaskBacklogData(taskToDelete)
+
+        if index:
+            self.backlogData.tasks.pop(index)
