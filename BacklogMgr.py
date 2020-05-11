@@ -165,6 +165,39 @@ class BacklogMgr():
 
         return index
 
+    def editTaskFromGUI(self, iIndex, iTaskFromGUI):
+        
+        errors = self.validateTask(iTaskFromGUI)
+
+        if not errors:
+
+            if (iIndex >= 0 and iIndex < len(self.backlogData.tasks)):
+                self.backlogData.tasks[iIndex] = iTaskFromGUI
+            else:
+                # Need some refactoring here. We should 
+                # call addNewTask(iTaskFromGUI) but it does not exist.
+                if(not self.getIndexTaskBacklogData(iTaskFromGUI)):
+                    self.backlogData.tasks.append(iTaskFromGUI)
+                else:
+                    errors.append("*Task already exist")
+        
+        return errors
+
+    def validateTask(self, iTask):
+
+        prjCode = iTask.prjCode
+        title = iTask.title
+
+        errors = list()
+
+        if (prjCode == "" ):
+            errors.append("*Project code required")
+
+        if (title == ""):
+            errors.append("*Title required")
+
+        return errors
+
     def writePieceToDutyData(self, iPiece):
         
         dty = Duty()

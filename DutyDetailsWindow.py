@@ -21,7 +21,7 @@ class DutyDetailsWindow(QDialog):
         mainLayout.addWidget(self.textEdit)
 
     def doInit(self):        
-
+        
         taskRegInDutyText = self.genTaskRegisteredString()
         self.textEdit.setText(taskRegInDutyText)
 

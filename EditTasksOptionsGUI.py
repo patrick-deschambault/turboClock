@@ -16,6 +16,10 @@ class EditTasksOptionsGUI(QDialog):
 
         self.currTaskSelected = ""
 
+        self.currIndexItemSelected = 0
+
+        self.prevIndexItemSelected = 0
+
         self.newItemEnum = 0
 
         self.initUI()
@@ -30,8 +34,6 @@ class EditTasksOptionsGUI(QDialog):
         self.listViewLayout = QVBoxLayout()
 
         self.listTasksView = QListWidget(self)
-
-        self.loadTasksOptions()
         
         self.layoutCurrTask = QFormLayout()
 
@@ -54,6 +56,10 @@ class EditTasksOptionsGUI(QDialog):
 
         mainLayout.addLayout(listViewTaskViewLayout)
 
+        self.loadTasksOptions()
+
+        self.updateCurrTaskLineEdits(self.currIndexItemSelected)
+
     def initCurrTaskLineEdits(self):
 
         self.idInput = QLineEdit(self)
@@ -73,8 +79,17 @@ class EditTasksOptionsGUI(QDialog):
 
     def manageCurrItemChangeTaskList(self):
 
-        currItemIndex = self.listTasksView.currentRow()
-        self.updateCurrTaskLineEdits(currItemIndex)
+        currIndex = self.currIndexItemSelected
+        currTask = self.backlogMgr.backlogData.tasks[currIndex]
+        
+        errors = self.backlogMgr.editTaskFromGUI(currIndex, currTask)
+
+        if not errors:
+            self.currIndexItemSelected = self.listTasksView.currentRow()
+        else:
+             self.listTasksView.setCurrentRow(self.currIndexItemSelected)       
+
+        self.updateCurrTaskLineEdits(self.currIndexItemSelected)
 
     def updateCurrTaskLineEdits(self, iCurrentTaskRow):
 
@@ -107,18 +122,21 @@ class EditTasksOptionsGUI(QDialog):
 
             self.listTasksView.addItem(textItem)
 
-        self.listTasksView.currentItemChanged.connect(self.manageCurrItemChangeTaskList)
+        self.currIndexItemSelected = 0
+        self.listTasksView.setCurrentRow(self.currIndexItemSelected)
+        #self.prevIndexItemSelected = self.currIndexItemSelected
 
+        self.listTasksView.itemSelectionChanged.connect(self.manageCurrItemChangeTaskList)
+        
     def manageAddTaskClickedButton(self):
 
         self.newItemEnum += 1
 
-        newTask = Task()
         #self.backlogMgr.manageAddTaskBacklogDataFromGUI()
         
         self.listTasksView.addItem('New Item {}'.format(str(self.newItemEnum)))
 
-        self.currTaskSelected = self.currTaskOptions[-1]
+        #self.currTaskSelected = self.currTaskOptions[-1]
 
         lastRowListView = self.listTasksView.count() - 1
         self.listTasksView.setCurrentRow(lastRowListView)
@@ -135,7 +153,7 @@ class EditTasksOptionsGUI(QDialog):
             return
         else:
             for item in selectedItem:
-                elemIndex = QModelIndex(self.listTasksView.indexFromItem(item)).row()
+                #elemIndex = QModelIndex(self.listTasksView.indexFromItem(item)).row()
                 self.listTasksView.takeItem(self.listTasksView.row(item))
 
                 self.backlogMgr.deleteTaskBacklogData(identifier, prjCode, title)
