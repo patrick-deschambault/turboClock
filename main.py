@@ -90,9 +90,17 @@ class MainWindow(QWidget):
 
     def initTFSTaskCombobox(self):
 
-        taskTFSGirolist = self.backlogMgr.getListTasksFromGUI()
+        taskList = self.backlogMgr.getTasksFromGUI()
 
-        for taskDesc in taskTFSGirolist:
+        for currTask in taskList:
+
+            if currTask.id:
+                taskDesc = currTask.id + ';' + \
+                               currTask.title        
+            else:
+                taskDesc = currTask.prjCode + ';' + \
+                               currTask.title
+
             self.taskTFSCb.addItem(taskDesc)
 
         currIndex = self.taskTFSCb.currentIndex()

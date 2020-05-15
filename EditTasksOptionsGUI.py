@@ -18,9 +18,9 @@ class EditTasksOptionsGUI(QDialog):
 
         self.currIndexItemSelected = 0
 
-        self.prevIndexItemSelected = 0
-
         self.newItemEnum = 0
+
+        self.tasksList = self.backlogMgr.backlogData.tasks
 
         self.initUI()
 
@@ -93,19 +93,21 @@ class EditTasksOptionsGUI(QDialog):
 
     def updateCurrTaskLineEdits(self, iCurrentTaskRow):
 
-        self.currTaskSelected = self.backlogMgr.backlogData.tasks[iCurrentTaskRow]
+        if iCurrentTaskRow < len(self.backlogMgr.backlogData.tasks):
 
-        self.idInput.setText(self.currTaskSelected.id)
-        self.titleInput.setText(self.currTaskSelected.title)
-        self.prjCodeInput.setText(self.currTaskSelected.prjCode)
+            self.currTaskSelected = self.backlogMgr.backlogData.tasks[iCurrentTaskRow]
 
-        compTime = str(datetime.timedelta(seconds = self.currTaskSelected.completedTime))
-        self.completedTime.setText(compTime)
+            self.idInput.setText(self.currTaskSelected.id)
+            self.titleInput.setText(self.currTaskSelected.title)
+            self.prjCodeInput.setText(self.currTaskSelected.prjCode)
 
-        estimatedTime = str(datetime.timedelta(seconds = self.currTaskSelected.estimatedTime))
-        self.estimatedTime.setText(estimatedTime)
+            compTime = str(datetime.timedelta(seconds = self.currTaskSelected.completedTime))
+            self.completedTime.setText(compTime)
 
-        self.percAccomplished = str(self.currTaskSelected.completionRatio)
+            estimatedTime = str(datetime.timedelta(seconds = self.currTaskSelected.estimatedTime))
+            self.estimatedTime.setText(estimatedTime)
+
+            self.percAccomplished = str(self.currTaskSelected.completionRatio)
 
     def loadTasksOptions(self):
 
@@ -132,7 +134,7 @@ class EditTasksOptionsGUI(QDialog):
 
         self.newItemEnum += 1
 
-        #self.backlogMgr.manageAddTaskBacklogDataFromGUI()
+        #self.backlogMgr.manageAddTaskBacklogDataFromGUI("","","")
         
         self.listTasksView.addItem('New Item {}'.format(str(self.newItemEnum)))
 

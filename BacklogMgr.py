@@ -8,6 +8,8 @@ from BacklogData import *
 
 from ErrorEnum import *
 
+import copy
+
 class BacklogMgr():
 
     def __init__(self):
@@ -286,23 +288,9 @@ class BacklogMgr():
         except:
             print("Error: index must be a strictly positive integer")
 
-    def getListTasksFromGUI(self):
+    def getTasksFromGUI(self):
 
-        cbboxElmDesclist = list()
-
-        for task in self.backlogData.tasks:
-            cbboxElmDesc = ''
-
-            if task.id:
-                cbboxElmDesc = task.id + ';' + \
-                               task.title        
-            else:
-                cbboxElmDesc = task.prjCode + ';' + \
-                               task.title
-                               
-            cbboxElmDesclist.append(cbboxElmDesc)
-            
-        return cbboxElmDesclist
+        return copy.copy(self.backlogData.tasks)
 
     def getCurrDutyTimeCompletedFromGUI(self):
 
