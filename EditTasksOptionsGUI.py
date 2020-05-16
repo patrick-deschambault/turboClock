@@ -20,6 +20,8 @@ class EditTasksOptionsGUI(QDialog):
 
         self.newItemEnum = 0
 
+        self.isTakeItemFromList = False
+
         self.tasksList = self.backlogMgr.getTasksFromGUI()
 
         self.initUI()
@@ -79,18 +81,27 @@ class EditTasksOptionsGUI(QDialog):
 
     def manageCurrItemChangeTaskList(self):
 
-        if self.listTasksView.currentRow() < len(self.tasksList):
-            self.currRowSelected = self.listTasksView.currentRow()
-        elif self.listTasksView.count() == 0:
-            self.currRowSelected = None
-        else:
-            self.currRowSelected = len(self.tasksList) - 1
+        if not self.isTakeItemFromList:
+            currRow = self.listTasksView.currentRow()
+            countItems = self.listTasksView.count()
 
-        self.updateCurrTaskSelected()
+            if currRow >= 0 and currRow < len(self.tasksList):
+                self.currRowSelected = currRow
+            elif countItems == 0:
+                self.currRowSelected = None
+            else:
+                self.currRowSelected = len(self.tasksList) - 1
+
+            self.updateCurrTaskSelected()
+        else:
+            self.isTakeItemFromList = False
 
     def updateCurrTaskSelected(self):
 
-        if self.currRowSelected >= 0 and self.currRowSelected < len(self.tasksList):
+        if self.currRowSelected != None and \
+           self.currRowSelected >= 0 and \
+           self.currRowSelected < len(self.tasksList):
+
             self.currTaskSelected = self.tasksList[self.currRowSelected]
             self.updateCurrTaskLineEdits(self.currRowSelected)
         else:
@@ -150,10 +161,18 @@ class EditTasksOptionsGUI(QDialog):
         self.currRowSelected = self.listTasksView.currentRow()
 
         if self.currRowSelected >= 0:
+
             self.tasksList.pop(self.currRowSelected)
+
+            if self.currRowSelected == 0:
+                self.isFirstRowDeleted = True
+            else:
+                self.isFirstRowDeleted = False
+
+            self.isTakeItemFromList = True
             self.listTasksView.takeItem(self.currRowSelected)
+
+            self.manageCurrItemChangeTaskList()
+
         else:
             pass
-                
-        
-
