@@ -38,6 +38,11 @@ class Task():
         self.completedTime -= iTimeInSeconds
         self.compCompletionRatio()
 
+    def setCompletedTime(self, iCompletedTimeStr):
+
+        x = time.strptime(iCompletedTimeStr, '%H:%M:%S')
+        self.completedTime = datetime.timedelta(hours = x.tm_hour, minutes = x.tm_min, seconds=x.tm_sec).total_seconds()
+
     def setEstimatedTime(self, iEstimatedTimeStr):
 
         x = time.strptime(iEstimatedTimeStr, '%H:%M:%S')
