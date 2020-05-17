@@ -81,37 +81,22 @@ class EditTasksOptionsGUI(QDialog):
 
     def manageCurrItemChangeTaskList(self):
 
-        if not self.isTakeItemFromList:
+        self.currRowSelected = self.listTasksView.currentRow()
 
-            self.manageTaskDetailsInputs()
-
-            currRow = self.listTasksView.currentRow()
-            countItems = self.listTasksView.count()
-
-            if currRow >= 0 and currRow < len(self.tasksList):
-                self.currRowSelected = currRow
-            elif countItems == 0:
-                self.currRowSelected = None
-            else:
-                self.currRowSelected = len(self.tasksList) - 1
-
-            self.updateCurrTaskSelected()
-        else:
-            self.isTakeItemFromList = False
+        self.updateCurrTaskSelected()
 
     def updateCurrTaskSelected(self):
 
-        if self.currRowSelected != None and \
-           self.currRowSelected >= 0 and \
+        if self.currRowSelected >= 0 and \
            self.currRowSelected < len(self.tasksList):
 
             self.currTaskSelected = self.tasksList[self.currRowSelected]
         else:
             self.currTaskSelected = Task()
 
-        self.updateCurrTaskLineEdits(self.currRowSelected)
+        self.updateCurrTaskLineEdits()
 
-    def updateCurrTaskLineEdits(self, iCurrentTaskRow):
+    def updateCurrTaskLineEdits(self):
 
         self.idInput.setText(self.currTaskSelected.id)
         self.titleInput.setText(self.currTaskSelected.title)
@@ -149,37 +134,27 @@ class EditTasksOptionsGUI(QDialog):
     def manageAddTaskClickedButton(self):
 
         self.newItemEnum += 1
-
-        newTask = Task()
-        self.tasksList.append(newTask)
         
         self.listTasksView.addItem('New Item {}'.format(str(self.newItemEnum)))
 
         lastRowListView = self.listTasksView.count() - 1
         self.listTasksView.setCurrentRow(lastRowListView)
-
-        self.currRowSelected = self.listTasksView.currentRow()
+        
+        self.tasksList.append(Task())
 
     def manageDeleteTaskClickedButton(self):
 
-        self.currRowSelected = self.listTasksView.currentRow()
+        self.listTasksView.takeItem(self.currRowSelected)
 
         if self.currRowSelected >= 0:
-
             self.tasksList.pop(self.currRowSelected)
-
-            if self.currRowSelected == 0:
-                self.isFirstRowDeleted = True
-            else:
-                self.isFirstRowDeleted = False
-
-            self.isTakeItemFromList = True
-            self.listTasksView.takeItem(self.currRowSelected)
-
-            self.manageCurrItemChangeTaskList()
-
+        elif self.currRowSelected == -1 and len(self.tasksList) > 0:
+            self.tasksList.pop(0)
         else:
             pass
+
+        self.currRowSelected = self.listTasksView.currentRow()
+        print(self.currRowSelected)
 
     def manageTaskDetailsInputs(self):
         
