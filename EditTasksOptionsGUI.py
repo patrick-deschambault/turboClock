@@ -82,6 +82,9 @@ class EditTasksOptionsGUI(QDialog):
     def manageCurrItemChangeTaskList(self):
 
         if not self.isTakeItemFromList:
+
+            self.manageTaskDetailsInputs()
+
             currRow = self.listTasksView.currentRow()
             countItems = self.listTasksView.count()
 
@@ -103,9 +106,10 @@ class EditTasksOptionsGUI(QDialog):
            self.currRowSelected < len(self.tasksList):
 
             self.currTaskSelected = self.tasksList[self.currRowSelected]
-            self.updateCurrTaskLineEdits(self.currRowSelected)
         else:
-            pass
+            self.currTaskSelected = Task()
+
+        self.updateCurrTaskLineEdits(self.currRowSelected)
 
     def updateCurrTaskLineEdits(self, iCurrentTaskRow):
 
@@ -176,3 +180,14 @@ class EditTasksOptionsGUI(QDialog):
 
         else:
             pass
+
+    def manageTaskDetailsInputs(self):
+        
+        currTaskIndex = self.currRowSelected
+        
+        self.tasksList[currTaskIndex].id = self.idInput.text()
+        self.tasksList[currTaskIndex].titleInput = self.titleInput.text()
+        self.tasksList[currTaskIndex].prjCode = self.prjCodeInput.text()
+
+        self.tasksList[currTaskIndex].setCompletedTime(self.completedTime.text())
+        self.tasksList[currTaskIndex].setEstimatedTime(self.estimatedTime.text())
