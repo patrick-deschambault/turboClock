@@ -4,8 +4,15 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import QModelIndex
 
 import datetime
+import enum
 
 from Task import *
+
+class State(enum.Enum):
+
+    ADDING_TASK = 0
+    DELETE_TASK = 1
+    SELECT_TASK = 2
 
 class EditTasksOptionsGUI(QDialog):
 
@@ -22,7 +29,11 @@ class EditTasksOptionsGUI(QDialog):
 
         self.isTakeItemFromList = False
 
+        self.listState = State.SELECT_TASK
+
         self.tasksList = self.backlogMgr.getTasksFromGUI()
+
+        self.currTaskErrors = list()
 
         self.initUI()
 
@@ -79,11 +90,32 @@ class EditTasksOptionsGUI(QDialog):
         self.layoutCurrTask.addRow("Estimated time:", self.estimatedTime)
         self.layoutCurrTask.addRow("Percentage accomplished:", self.percAccomplished)
 
-    def manageCurrItemChangeTaskList(self):
+    def manageCurrRowChangeList(self):
 
+        prevRowSelected = self.currRowSelected
         self.currRowSelected = self.listTasksView.currentRow()
 
+        if self.listState == State.ADDING_TASK:
+            
+            self.tasksList.append(Task())
+
+        elif self.listState == State.DELETE_TASK:
+            
+            countListItems = self.listTasksView.count()
+
+            if countListItems > 0  and prevRowSelected >= 0:
+                self.tasksList.pop(prevRowSelected)
+
+                if self.currRowSelected > prevRowSelected:
+                    self.currRowSelected = prevRowSelected
+            else:
+                pass
+        else:
+            pass
+
         self.updateCurrTaskSelected()
+
+        self.setCurrTaskFromLineEdits()
 
     def updateCurrTaskSelected(self):
 
@@ -112,13 +144,11 @@ class EditTasksOptionsGUI(QDialog):
 
     def loadTasksOptions(self):
 
-        self.currTaskOptions = self.tasksList
-
         self.initListViewOfTasks()
 
     def initListViewOfTasks(self):
 
-        for currTask in self.currTaskOptions:
+        for currTask in self.tasksList:
             
             currId = currTask.id
             currTitle = currTask.title
@@ -129,9 +159,11 @@ class EditTasksOptionsGUI(QDialog):
         self.currRowSelected = 0
         self.listTasksView.setCurrentRow(self.currRowSelected)
 
-        self.listTasksView.itemSelectionChanged.connect(self.manageCurrItemChangeTaskList)
+        self.listTasksView.itemSelectionChanged.connect(self.manageCurrRowChangeList)
         
     def manageAddTaskClickedButton(self):
+
+        self.listState = State.ADDING_TASK
 
         self.newItemEnum += 1
         
@@ -139,30 +171,23 @@ class EditTasksOptionsGUI(QDialog):
 
         lastRowListView = self.listTasksView.count() - 1
         self.listTasksView.setCurrentRow(lastRowListView)
-        
-        self.tasksList.append(Task())
+
+        self.listState = State.SELECT_TASK
+
 
     def manageDeleteTaskClickedButton(self):
 
+        self.listState = State.DELETE_TASK
+
         self.listTasksView.takeItem(self.currRowSelected)
 
-        if self.currRowSelected >= 0:
-            self.tasksList.pop(self.currRowSelected)
-        elif self.currRowSelected == -1 and len(self.tasksList) > 0:
-            self.tasksList.pop(0)
-        else:
-            pass
+        self.listState = State.SELECT_TASK
 
-        self.currRowSelected = self.listTasksView.currentRow()
-        print(self.currRowSelected)
-
-    def manageTaskDetailsInputs(self):
+    def setCurrTaskFromLineEdits(self):
         
-        currTaskIndex = self.currRowSelected
-        
-        self.tasksList[currTaskIndex].id = self.idInput.text()
-        self.tasksList[currTaskIndex].titleInput = self.titleInput.text()
-        self.tasksList[currTaskIndex].prjCode = self.prjCodeInput.text()
+        self.currTaskSelected.id = self.idInput.text()
+        self.currTaskSelected.title = self.titleInput.text()
+        self.currTaskSelected.prjCode = self.prjCodeInput.text()
 
-        self.tasksList[currTaskIndex].setCompletedTime(self.completedTime.text())
-        self.tasksList[currTaskIndex].setEstimatedTime(self.estimatedTime.text())
+        self.currTaskSelected.setCompletedTime(self.completedTime.text())
+        self.currTaskSelected.setEstimatedTime(self.estimatedTime.text())
