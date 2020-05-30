@@ -88,6 +88,8 @@ class MainWindow(QWidget):
         self.startTime = 0
         self.stopTime = 0
 
+        self.editTasksGUI = EditTasksOptionsGUI(self, self.backlogMgr)
+
     def initTFSTaskCombobox(self):
 
         taskList = self.backlogMgr.getTasksFromGUI()
@@ -170,8 +172,11 @@ class MainWindow(QWidget):
     
     def manageEditTasksOptions(self):
 
-        ex = EditTasksOptionsGUI(self, self.backlogMgr)
-        ex.show()
+        self.editTasksGUI.exec()
+
+        self.taskTFSCb.clear()
+
+        self.initTFSTaskCombobox()
 
     def closeEvent(self, event):
 

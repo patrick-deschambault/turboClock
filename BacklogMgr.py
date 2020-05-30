@@ -142,7 +142,7 @@ class BacklogMgr():
 
         index = self.getIndexTaskBacklogData(iPiece.task)
 
-        if index > 0:
+        if index >= 0:
             taskBacklog = self.backlogData.tasks[index]
             taskBacklog.completedTime += iPiece.task.completedTime
 
@@ -335,3 +335,10 @@ class BacklogMgr():
 
         if index:
             self.backlogData.tasks.pop(index)
+
+    def replaceTasksBacklogData(self, iTasksList):
+
+        if len(iTasksList) > 0:
+
+            self.backlogData.tasks.clear()
+            self.backlogData.tasks = copy.copy(iTasksList)

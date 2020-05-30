@@ -73,6 +73,12 @@ class EditTasksOptionsGUI(QDialog):
 
         self.updateCurrTaskSelected()
 
+    def accept(self):
+        print("")
+
+    def reject(self):
+        print("")
+
     def initCurrTaskLineEdits(self):
 
         self.idInput = QLineEdit(self)
@@ -191,3 +197,7 @@ class EditTasksOptionsGUI(QDialog):
 
         self.currTaskSelected.setCompletedTime(self.completedTime.text())
         self.currTaskSelected.setEstimatedTime(self.estimatedTime.text())
+
+    def closeEvent(self, event):
+
+        self.backlogMgr.replaceTasksBacklogData(self.tasksList)
