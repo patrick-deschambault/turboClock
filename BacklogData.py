@@ -13,6 +13,8 @@ class BacklogData:
       self.tasks = list()
 
       self.currTask = Task("", "", "")
+      
+      self.currTaskIndex = 0
 
       self.currPiece = Piece("", "", "")
 

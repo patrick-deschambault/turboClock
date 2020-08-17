@@ -6,8 +6,6 @@ import os
 
 from BacklogData import *
 
-from ErrorEnum import *
-
 import copy
 
 class BacklogMgr():
@@ -94,6 +92,7 @@ class BacklogMgr():
     def loadDutyData(self, iDate, iDuty):
 
         dutyDataExist = os.path.isfile(self.backlogData.pathTasksData)
+        
         if not dutyDataExist:
             file = open(self.backlogData.pathTasksData, 'w+')
             file.close()
@@ -124,7 +123,7 @@ class BacklogMgr():
 
         currDate = self.backlogData.currDate
         self.loadDutyData(currDate, self.backlogData.currDuty)
-    
+
     def addNewTask(self, iId, iPrjCode, iTitle, iCompletedTime = 0, iEstimatedTime = ""):
         
         newTask = Task(iPrjCode, iTitle, iId)
@@ -133,8 +132,6 @@ class BacklogMgr():
 
         if not self.getIndexTaskBacklogData(newTask):
             self.backlogData.tasks.append(newTask)
-        else:
-            return ErrorEnum.ERROR_TASK_ALREADY_EXIST
 
     def addPieceToCurrDuty(self, iPiece):
 
@@ -192,10 +189,10 @@ class BacklogMgr():
 
         errors = list()
 
-        if (prjCode == "" ):
+        if (prjCode == '' ):
             errors.append("*Project code required")
 
-        if (title == ""):
+        if (title == ''):
             errors.append("*Title required")
 
         return errors
@@ -285,6 +282,7 @@ class BacklogMgr():
 
         try:
             self.backlogData.currTask = self.backlogData.tasks[iIndexCbb]
+            self.backlogData.currTaskIndex = iIndexCbb
         except:
             print("Error: index must be a strictly positive integer")
 

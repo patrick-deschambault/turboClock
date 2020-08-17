@@ -7,6 +7,8 @@ import datetime
 import enum
 
 from Task import *
+from BacklogMgr import *
+from BacklogData import *
 
 class State(enum.Enum):
 
@@ -22,6 +24,8 @@ class EditTasksOptionsGUI(QDialog):
         self.backlogMgr = iBacklogMgr
 
         self.currTaskSelected = Task()
+
+        self.tempoTask = Task()
 
         self.currRowSelected = 0
 
@@ -73,12 +77,6 @@ class EditTasksOptionsGUI(QDialog):
 
         self.updateCurrTaskSelected()
 
-    def accept(self):
-        print("")
-
-    def reject(self):
-        print("")
-
     def initCurrTaskLineEdits(self):
 
         self.idInput = QLineEdit(self)
@@ -101,12 +99,18 @@ class EditTasksOptionsGUI(QDialog):
         prevRowSelected = self.currRowSelected
         self.currRowSelected = self.listTasksView.currentRow()
 
+        if self.currRowSelected == self.backlogMgr.backlogData.currTaskIndex:
+            self.deleteTaskButton.setEnabled(False)
+        else:
+            self.deleteTaskButton.setEnabled(True)
+
         if self.listState == State.ADDING_TASK:
             
             self.tasksList.append(Task())
+            self.updateCurrTaskSelected()
 
         elif self.listState == State.DELETE_TASK:
-            
+
             countListItems = self.listTasksView.count()
 
             if countListItems > 0  and prevRowSelected >= 0:
@@ -116,12 +120,21 @@ class EditTasksOptionsGUI(QDialog):
                     self.currRowSelected = prevRowSelected
             else:
                 pass
+
+            self.updateCurrTaskSelected()
+
         else:
-            pass
 
-        self.updateCurrTaskSelected()
+            self.updateTaskFromLineEdits(self.tempoTask)
 
-        self.setCurrTaskFromLineEdits()
+            isTaskNotValid = self.backlogMgr.validateTask(self.tempoTask)
+
+            if len(isTaskNotValid) != 0:
+                self.currRowSelected = prevRowSelected
+                self.listTasksView.setCurrentRow(self.currRowSelected)
+            else:
+                self.updateTaskFromLineEdits(self.currTaskSelected)
+                self.updateCurrTaskSelected()
 
     def updateCurrTaskSelected(self):
 
@@ -180,8 +193,9 @@ class EditTasksOptionsGUI(QDialog):
 
         self.listState = State.SELECT_TASK
 
-
     def manageDeleteTaskClickedButton(self):
+
+        self.newItemEnum -= 1
 
         self.listState = State.DELETE_TASK
 
@@ -189,14 +203,14 @@ class EditTasksOptionsGUI(QDialog):
 
         self.listState = State.SELECT_TASK
 
-    def setCurrTaskFromLineEdits(self):
-        
-        self.currTaskSelected.id = self.idInput.text()
-        self.currTaskSelected.title = self.titleInput.text()
-        self.currTaskSelected.prjCode = self.prjCodeInput.text()
+    def updateTaskFromLineEdits(self, iTask):
+                
+        iTask.id = self.idInput.text()
+        iTask.title = self.titleInput.text()
+        iTask.prjCode = self.prjCodeInput.text()
 
-        self.currTaskSelected.setCompletedTime(self.completedTime.text())
-        self.currTaskSelected.setEstimatedTime(self.estimatedTime.text())
+        iTask.setCompletedTime(self.completedTime.text())
+        iTask.setEstimatedTime(self.estimatedTime.text())
 
     def closeEvent(self, event):
 

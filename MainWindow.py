@@ -92,6 +92,15 @@ class MainWindow(QWidget):
 
     def initTFSTaskCombobox(self):
 
+        self.updateTaskCombobox()
+
+        currIndex = self.taskTFSCb.currentIndex()
+        self.backlogMgr.setCurrentTaskFromGUI(currIndex)
+
+        self.taskTFSCb.currentIndexChanged.connect(self.manageCbTFSIndexChange)
+    
+    def updateTaskCombobox(self):
+
         taskList = self.backlogMgr.getTasksFromGUI()
 
         for currTask in taskList:
@@ -104,11 +113,6 @@ class MainWindow(QWidget):
                                currTask.title
 
             self.taskTFSCb.addItem(taskDesc)
-
-        currIndex = self.taskTFSCb.currentIndex()
-        self.backlogMgr.setCurrentTaskFromGUI(currIndex)
-
-        self.taskTFSCb.currentIndexChanged.connect(self.manageCbTFSIndexChange)
 
     def manageCbTFSIndexChange(self):
 
