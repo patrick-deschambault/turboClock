@@ -31,8 +31,6 @@ class EditTasksOptionsGUI(QDialog):
 
         self.newItemEnum = 0
 
-        self.isTakeItemFromList = False
-
         self.listState = State.SELECT_TASK
 
         self.tasksList = self.backlogMgr.getTasksFromGUI()
@@ -134,6 +132,9 @@ class EditTasksOptionsGUI(QDialog):
                 self.listTasksView.setCurrentRow(self.currRowSelected)
             else:
                 self.updateTaskFromLineEdits(self.currTaskSelected)
+
+                self.updateTextRowListView(prevRowSelected, self.tempoTask)
+
                 self.updateCurrTaskSelected()
 
     def updateCurrTaskSelected(self):
@@ -215,3 +216,10 @@ class EditTasksOptionsGUI(QDialog):
     def closeEvent(self, event):
 
         self.backlogMgr.replaceTasksBacklogData(self.tasksList)
+
+    def updateTextRowListView(self, iRow, iTask):
+
+        item = self.listTasksView.item(iRow)
+
+        item.setText(iTask.id + ' - ' + iTask.title)
+

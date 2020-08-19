@@ -18,6 +18,7 @@ class Task():
 
         self.completionRatio = 0
 
+
     def __copy__(self):
         
          taskToReturn = Task(self.prjCode, self.title, self.id)
