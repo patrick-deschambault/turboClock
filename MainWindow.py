@@ -47,6 +47,7 @@ class MainWindow(QWidget):
 
         self.dutyTimeCompLbl = QLabel()        
 
+        self.currTaskItemRow = 0
         self.taskTFSCb = QComboBox(self)
         self.initTFSTaskCombobox()
 
@@ -94,12 +95,13 @@ class MainWindow(QWidget):
 
         self.updateTaskCombobox()
 
-        currIndex = self.taskTFSCb.currentIndex()
-        self.backlogMgr.setCurrentTaskFromGUI(currIndex)
-
         self.taskTFSCb.currentIndexChanged.connect(self.manageCbTFSIndexChange)
     
     def updateTaskCombobox(self):
+
+        currTaskIndex = self.currTaskItemRow
+
+        self.taskTFSCb.clear()
 
         taskList = self.backlogMgr.getTasksFromGUI()
 
@@ -114,11 +116,16 @@ class MainWindow(QWidget):
 
             self.taskTFSCb.addItem(taskDesc)
 
+        self.taskTFSCb.setCurrentIndex(currTaskIndex)
+
+        self.backlogMgr.setCurrentTaskFromGUI(currTaskIndex)
+
     def manageCbTFSIndexChange(self):
 
-        currIndex = self.taskTFSCb.currentIndex()
+        self.currTaskItemRow = self.taskTFSCb.currentIndex()
 
-        self.backlogMgr.manageTaskChangeFromGUI(currIndex)
+        if self.currTaskItemRow >= 0:
+            self.backlogMgr.manageTaskChangeFromGUI(self.currTaskItemRow)
 
         self.updateTimeLCD()
 
@@ -178,9 +185,7 @@ class MainWindow(QWidget):
 
         self.editTasksGUI.exec_()
 
-        self.taskTFSCb.clear()
-
-        self.initTFSTaskCombobox()
+        self.updateTaskCombobox()
 
     def closeEvent(self, event):
 
