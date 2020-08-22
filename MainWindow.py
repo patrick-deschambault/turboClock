@@ -176,7 +176,7 @@ class MainWindow(QWidget):
     
     def manageEditTasksOptions(self):
 
-        self.editTasksGUI.exec()
+        self.editTasksGUI.exec_()
 
         self.taskTFSCb.clear()
 

@@ -80,7 +80,20 @@ class EditTasksOptionsGUI(QDialog):
         self.loadTasksOptions()
 
         self.updateCurrTaskSelected()
-    
+
+    def exec_(self):
+
+        self.tasksList = self.backlogMgr.getTasksFromGUI()
+
+        for currRow in range(0, self.listTasksView.count()):
+            self.updateTextRowListView(currRow, self.tasksList[currRow])
+
+        self.updateCurrTaskSelected()
+
+        self.updateCurrTaskLineEdits()
+        
+        self.exec()
+
     def initCurrTaskLineEdits(self):
 
         self.idInput = QLineEdit(self)
