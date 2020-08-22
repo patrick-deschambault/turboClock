@@ -288,7 +288,7 @@ class BacklogMgr():
 
     def getTasksFromGUI(self):
 
-        return copy.copy(self.backlogData.tasks)
+        return copy.deepcopy(self.backlogData.tasks)
 
     def getCurrDutyTimeCompletedFromGUI(self):
 
@@ -340,3 +340,5 @@ class BacklogMgr():
 
             self.backlogData.tasks.clear()
             self.backlogData.tasks = copy.copy(iTasksList)
+
+            self.writeTasksData()

@@ -1,7 +1,7 @@
 
 from PyQt5.QtWidgets import (QFormLayout, QApplication, QWidget, QLabel, QLineEdit, QDialogButtonBox, QDialog, QHBoxLayout, QVBoxLayout, QListWidget, QPushButton)
 from PyQt5.QtGui import QIcon
-from PyQt5.QtCore import QModelIndex
+from PyQt5.QtCore import Qt, QModelIndex
 
 import datetime
 import enum
@@ -62,6 +62,11 @@ class EditTasksOptionsGUI(QDialog):
         self.deleteTaskButton.setIcon(QIcon("Images//minus_icon.png"))
         self.deleteTaskButton.clicked.connect(self.manageDeleteTaskClickedButton)
 
+        self.buttonbox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+
+        self.buttonbox.accepted.connect(self.accept)
+        self.buttonbox.rejected.connect(self.reject)
+
         self.listViewLayout.addWidget(self.listTasksView)
         self.listViewLayout.addWidget(self.addTaskButton)
         self.listViewLayout.addWidget(self.deleteTaskButton)
@@ -70,11 +75,12 @@ class EditTasksOptionsGUI(QDialog):
         listViewTaskViewLayout.addLayout(self.layoutCurrTask)
 
         mainLayout.addLayout(listViewTaskViewLayout)
+        mainLayout.addWidget(self.buttonbox)
 
         self.loadTasksOptions()
 
         self.updateCurrTaskSelected()
-
+    
     def initCurrTaskLineEdits(self):
 
         self.idInput = QLineEdit(self)
@@ -215,7 +221,13 @@ class EditTasksOptionsGUI(QDialog):
 
     def closeEvent(self, event):
 
+        self.reject()
+
+    def accept(self):
+
         self.backlogMgr.replaceTasksBacklogData(self.tasksList)
+
+        self.close()
 
     def updateTextRowListView(self, iRow, iTask):
 
