@@ -342,3 +342,21 @@ class BacklogMgr():
             self.backlogData.tasks = copy.copy(iTasksList)
 
             self.writeTasksData()
+
+    def getCompletionRatio(self, iTaskRow):
+
+        if iTaskRow >= 0 and iTaskRow < len(self.backlogData.tasks):
+            
+            timeCompleted = self.backlogData.tasks[iTaskRow].completedTime
+            estimatedTime = self.backlogData.tasks[iTaskRow].estimatedTime
+
+            if estimatedTime != 0:
+                ratio = int((timeCompleted / estimatedTime) * 100)
+            else:
+                ratio = 0
+
+        return ratio
+            
+
+
+

@@ -1,12 +1,11 @@
 #-*- coding: utf-8 -*-
 
-from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication, QWidget, QLabel, QLineEdit, QPushButton, QDialog, QComboBox, QMessageBox)
+from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication, QWidget, QLabel, QLineEdit, QPushButton, QDialog, QComboBox, QMessageBox, QProgressBar)
 from PyQt5.QtCore import QTimer, QTime, QSettings
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPalette, QColor
 
 from EditTasksOptionsGUI import *
 from DutyDetailsWindow import *
-from TasksDetailsWindow import *
 
 import datetime
 
@@ -38,12 +37,12 @@ class MainWindow(QWidget):
         self.btnDutyDetails = QPushButton('Duty details...')
         self.btnDutyDetails.clicked.connect(self.manageDutyDetailsClickedEvent)
 
-        self.btnTasksDetails = QPushButton('Tasks details...')
-        self.btnTasksDetails.clicked.connect(self.manageTaskDetailsClickedEvent)
-        
         self.btnAddTfsTask = QPushButton('', self)
         self.btnAddTfsTask.setIcon(QIcon('Images//plus_icon.png'))
         self.btnAddTfsTask.clicked.connect(self.manageEditTasksOptions)
+
+        self.progressBar = QProgressBar()
+        self.progressBar.setValue(0)
 
         self.dutyTimeCompLbl = QLabel()        
 
@@ -70,11 +69,14 @@ class MainWindow(QWidget):
         layoutDutyStat = QHBoxLayout()
         layoutDutyStat.addWidget(self.dutyTimeCompLbl)
 
+        layoutProgressBar = QHBoxLayout()
+        layoutProgressBar.addWidget(self.progressBar)
+
         mainLayout.addLayout(layoutTimer)
         mainLayout.addLayout(fieldsInputLayout)
         mainLayout.addWidget(self.btnStartPause)
         mainLayout.addWidget(self.btnDutyDetails)
-        mainLayout.addWidget(self.btnTasksDetails)
+        mainLayout.addWidget(self.progressBar)
         mainLayout.addLayout(layoutDutyStat)
 
         self.timer = QTimer(self)
@@ -85,6 +87,7 @@ class MainWindow(QWidget):
 
         self.updateTimeLCD()
         self.updateDutyTimeDisp()
+        self.updateProgressBarDisplay()
 
         self.startTime = 0
         self.stopTime = 0
@@ -96,6 +99,10 @@ class MainWindow(QWidget):
         self.updateTaskCombobox()
 
         self.taskTFSCb.currentIndexChanged.connect(self.manageCbTFSIndexChange)
+
+    def updateProgressBarDisplay(self):
+
+        self.progressBar.setValue(self.backlogMgr.getCompletionRatio(self.backlogMgr.backlogData.currTaskIndex))
     
     def updateTaskCombobox(self):
 
@@ -128,6 +135,8 @@ class MainWindow(QWidget):
             self.backlogMgr.manageTaskChangeFromGUI(self.currTaskItemRow)
 
         self.updateTimeLCD()
+
+        self.updateProgressBarDisplay()
 
     def updateTimeLCD(self):
 
@@ -176,11 +185,6 @@ class MainWindow(QWidget):
         ex = DutyDetailsWindow(self, self.backlogMgr.backlogData)
         ex.show()
 
-    def manageTaskDetailsClickedEvent(self):
-        
-        ex = TasksDetailsWindow(self, self.backlogMgr.backlogData)
-        ex.show()
-    
     def manageEditTasksOptions(self):
 
         self.editTasksGUI.exec_()
