@@ -1,6 +1,6 @@
 
-from PyQt5.QtWidgets import (QFormLayout, QApplication, QWidget, QLabel, QLineEdit, QDialogButtonBox, QDialog, QHBoxLayout, QVBoxLayout, QListWidget, QPushButton)
-from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (QFormLayout, QApplication, QWidget, QLabel, QLineEdit, QDialogButtonBox, QDialog, QHBoxLayout, QVBoxLayout, QListWidget, QPushButton, QMessageBox)
+from PyQt5.QtGui import QIcon, QPalette, QColor
 from PyQt5.QtCore import Qt, QModelIndex
 
 import datetime
@@ -77,6 +77,10 @@ class EditTasksOptionsGUI(QDialog):
         mainLayout.addLayout(listViewTaskViewLayout)
         mainLayout.addWidget(self.buttonbox)
 
+        self.invalidTaskErrMsg = QMessageBox()
+        self.invalidTaskErrMsg.setText("The current task is invalid.")
+        self.invalidTaskErrMsg.setIcon(QMessageBox.Critical)
+
         self.loadTasksOptions()
 
         self.updateCurrTaskSelected()
@@ -97,7 +101,9 @@ class EditTasksOptionsGUI(QDialog):
     def initCurrTaskLineEdits(self):
 
         self.idInput = QLineEdit(self)
+        self.titleInputErr = QLabel(self)
         self.titleInput = QLineEdit(self)
+        self.prjCodeInputErr = QLabel(self)
         self.prjCodeInput = QLineEdit(self)
         self.completedTime = QLineEdit(self)
         self.estimatedTime = QLineEdit(self)
@@ -105,7 +111,23 @@ class EditTasksOptionsGUI(QDialog):
         self.percAccomplished.setEnabled(False)
 
         self.layoutCurrTask.addRow("Id:", self.idInput)
+
+        self.redPalette = QPalette()
+        redColor = QColor(255, 0, 0)
+        self.redPalette.setColor(QPalette.WindowText, redColor)
+
+        self.titleInputErr.setText("* A title is required.")
+        self.layoutCurrTask.addWidget(self.titleInputErr)
+        self.titleInputErr.setVisible(False)
+        self.titleInputErr.setPalette(self.redPalette)
+
         self.layoutCurrTask.addRow("Title:", self.titleInput)
+        
+        self.prjCodeInputErr.setText("* A project code is required.")
+        self.layoutCurrTask.addWidget(self.prjCodeInputErr)
+        self.prjCodeInputErr.setVisible(False)
+        self.prjCodeInputErr.setPalette(self.redPalette)
+
         self.layoutCurrTask.addRow("Project code:", self.prjCodeInput)
         self.layoutCurrTask.addRow("Completed time:", self.completedTime)
         self.layoutCurrTask.addRow("Estimated time:", self.estimatedTime)
@@ -146,10 +168,16 @@ class EditTasksOptionsGUI(QDialog):
 
             isTaskNotValid = self.backlogMgr.validateTask(self.tempoTask)
 
-            if len(isTaskNotValid) != 0:
+            if len(isTaskNotValid):
+                self.titleInputErr.setVisible(True)
+                self.prjCodeInputErr.setVisible(True)
                 self.currRowSelected = prevRowSelected
                 self.listTasksView.setCurrentRow(self.currRowSelected)
+
             else:
+                self.titleInputErr.setVisible(False)
+                self.prjCodeInputErr.setVisible(False)
+
                 self.updateTaskFromLineEdits(self.currTaskSelected)
 
                 self.updateTextRowListView(prevRowSelected, self.tempoTask)
@@ -238,7 +266,18 @@ class EditTasksOptionsGUI(QDialog):
 
     def accept(self):
 
-        self.backlogMgr.replaceTasksBacklogData(self.tasksList)
+        self.updateTaskFromLineEdits(self.tempoTask)
+
+        isTaskNotValid = self.backlogMgr.validateTask(self.tempoTask)
+
+        if len(isTaskNotValid):
+
+            self.invalidTaskErrMsg.exec()
+            return
+            
+        else:
+            self.updateTaskFromLineEdits(self.currTaskSelected)
+            self.backlogMgr.replaceTasksBacklogData(self.tasksList)
 
         self.close()
 
