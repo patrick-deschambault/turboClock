@@ -90,7 +90,7 @@ class EditTasksOptionsGUI(QDialog):
         self.tasksList = self.backlogMgr.getTasksFromGUI()
 
         for currRow in range(0, self.listTasksView.count()):
-            self.updateTextRowListView(currRow, self.tasksList[currRow])
+            self.updateTextRowListView(currRow, self.tasksList[currRow].title)
 
         self.updateCurrTaskSelected()
 
@@ -102,7 +102,10 @@ class EditTasksOptionsGUI(QDialog):
 
         self.idInput = QLineEdit(self)
         self.titleInputErr = QLabel(self)
+
         self.titleInput = QLineEdit(self)
+        self.titleInput.editingFinished.connect(self.manageTitleEntered)
+
         self.prjCodeInputErr = QLabel(self)
         self.prjCodeInput = QLineEdit(self)
         self.completedTime = QLineEdit(self)
@@ -133,6 +136,10 @@ class EditTasksOptionsGUI(QDialog):
         self.layoutCurrTask.addRow("Estimated time:", self.estimatedTime)
         self.layoutCurrTask.addRow("Percentage accomplished:", self.percAccomplished)
 
+    def manageTitleEntered(self):
+
+        self.updateTextRowListView(self.currRowSelected, self.titleInput.text())
+    
     def manageCurrRowChangeList(self):
 
         prevRowSelected = self.currRowSelected
@@ -180,7 +187,7 @@ class EditTasksOptionsGUI(QDialog):
 
                 self.updateTaskFromLineEdits(self.currTaskSelected)
 
-                self.updateTextRowListView(prevRowSelected, self.tempoTask)
+                self.updateTextRowListView(prevRowSelected, self.tempoTask.title)
 
                 self.updateCurrTaskSelected()
 
@@ -215,13 +222,11 @@ class EditTasksOptionsGUI(QDialog):
 
     def initListViewOfTasks(self):
 
-        for currTask in self.tasksList:
-            
-            currId = currTask.id
-            currTitle = currTask.title
-            textItem = currId + ' - ' + currTitle
+        for currIndex, currTask in enumerate(self.tasksList):
 
-            self.listTasksView.addItem(textItem)
+            self.listTasksView.addItem("")
+
+            self.updateTextRowListView(currIndex, currTask.title)
 
         self.currRowSelected = 0
         self.listTasksView.setCurrentRow(self.currRowSelected)
@@ -281,9 +286,9 @@ class EditTasksOptionsGUI(QDialog):
 
         self.close()
 
-    def updateTextRowListView(self, iRow, iTask):
+    def updateTextRowListView(self, iRow, iTaskTitle):
 
         item = self.listTasksView.item(iRow)
 
-        item.setText(iTask.id + ' - ' + iTask.title)
+        item.setText(iTaskTitle)
 
