@@ -96,6 +96,9 @@ class EditTasksOptionsGUI(QDialog):
 
         self.updateCurrTaskLineEdits()
         
+        self.titleInputErr.setVisible(False)
+        self.prjCodeInputErr.setVisible(False)
+        
         self.exec()
 
     def initCurrTaskLineEdits(self):
