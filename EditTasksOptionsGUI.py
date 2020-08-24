@@ -281,6 +281,8 @@ class EditTasksOptionsGUI(QDialog):
         if len(isTaskNotValid):
 
             self.invalidTaskErrMsg.exec()
+            self.titleInputErr.setVisible(True)
+            self.prjCodeInputErr.setVisible(True)
             return
             
         else:
