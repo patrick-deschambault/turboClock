@@ -150,19 +150,12 @@ class BacklogMgr():
         index = None
 
         for i, currTask in enumerate(self.backlogData.tasks):
-            if iTask.id == currTask.id:
+            if iTask.title == currTask.title and \
+                iTask.prjCode == currTask.prjCode:
                 index = i
                 break
-            else:
-                if iTask.id == "":
-                    if iTask.title == currTask.title and \
-                        iTask.prjCode == currTask.prjCode:
-                        index = i
-                        break
-                    else: 
-                        continue
-                else:
-                    continue
+            else: 
+                continue
 
         return index
 
@@ -358,6 +351,3 @@ class BacklogMgr():
 
         return ratio
             
-
-
-
