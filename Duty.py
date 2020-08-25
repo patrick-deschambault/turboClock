@@ -54,7 +54,7 @@ class Duty():
                         continue
                 else:
                     if currTask.title != "":
-                        if currTask.projectCode == taskOfPce.projectCode and currTask.title == taskOfPce.title:
+                        if currTask.prjCode == taskOfPce.prjCode and currTask.title == taskOfPce.title:
                             
                             isTaskNoIDFoundInRegisteredTasks = True
                             index = i
