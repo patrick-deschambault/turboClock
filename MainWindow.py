@@ -80,6 +80,7 @@ class MainWindow(QWidget):
         mainLayout.addLayout(layoutDutyStat)
 
         self.timer = QTimer(self)
+        self.deltaTimer = 0
         self.currTimeLCD = QTime(0,0,0)
         self.currTimeDuty = QTime(0,0,0)
 
@@ -102,7 +103,16 @@ class MainWindow(QWidget):
 
     def updateProgressBarDisplay(self):
 
-        self.progressBar.setValue(self.backlogMgr.getCompletionRatio(self.backlogMgr.backlogData.currTaskIndex))
+        estimatedTime = self.backlogMgr.backlogData.currTask.estimatedTime
+
+        if estimatedTime == 0:
+            return
+
+        ratioFromTimer = (self.deltaTimer / estimatedTime) * 100
+
+        totalCompletionRatio = self.backlogMgr.getCompletionRatio(self.backlogMgr.backlogData.currTaskIndex) + ratioFromTimer
+
+        self.progressBar.setValue(totalCompletionRatio)
     
     def updateTaskCombobox(self):
 
@@ -114,12 +124,7 @@ class MainWindow(QWidget):
 
         for currTask in taskList:
 
-            if currTask.id:
-                taskDesc = currTask.id + ';' + \
-                               currTask.title        
-            else:
-                taskDesc = currTask.prjCode + ';' + \
-                               currTask.title
+            taskDesc = currTask.title + ' (' + currTask.prjCode + ')'
 
             self.taskTFSCb.addItem(taskDesc)
 
@@ -136,6 +141,8 @@ class MainWindow(QWidget):
 
         self.updateTimeLCD()
 
+
+        self.deltaTimer = 0
         self.updateProgressBarDisplay()
 
     def updateTimeLCD(self):
@@ -168,14 +175,18 @@ class MainWindow(QWidget):
         self.currTimeDuty = self.currTimeDuty.addSecs(1)
         self.dutyTimeCompLbl.setText('Daily time completed: ' + self.currTimeDuty.toString('hh:mm:ss'))
 
+        self.deltaTimer += 1
+
+        self.updateProgressBarDisplay()
+
     def manageStartPauseClickedEvent(self):
 
         self.backlogMgr.manageClickButtonFromGUI()
+        self.deltaTimer = 0
 
         if self.timer.isActive():
             self.timer.stop()
             self.btnStartPause.setIcon(QIcon('Images//play_icon.png'))
-
         else:
             self.timer.start(1000)
             self.btnStartPause.setIcon(QIcon('Images//pause_icon.png'))
