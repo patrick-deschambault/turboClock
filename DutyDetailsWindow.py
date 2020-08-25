@@ -34,8 +34,6 @@ class DutyDetailsWindow(QDialog):
 
         for currTask in self.backlogData.currDuty.tasksRegistered:
 
-            s += currTask.id
-            s += ' - '
             s += currTask.prjCode
             s += ' - '
             s += currTask.title
