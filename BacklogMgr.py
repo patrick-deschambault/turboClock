@@ -14,8 +14,6 @@ class BacklogMgr():
 
         self.backlogData = BacklogData()
 
-        self.initCurrDate()
-
         dataPath = os.getcwd() + '\\Data'
 
         if not os.path.exists(dataPath):
@@ -70,11 +68,13 @@ class BacklogMgr():
         if not dutyDataExist:
             file = open(self.backlogData.pathTasksData, 'w')
             file.close()
+            return
         
         file = open(self.backlogData.pathTasksData, 'r')
+
         for line in file:
 
-            if(line != ""):
+            if (line != ""):
                 line = line.split(";")
 
                 taskId = line[0]
@@ -96,8 +96,10 @@ class BacklogMgr():
         if not dutyDataExist:
             file = open(self.backlogData.pathTasksData, 'w+')
             file.close()
+            return
 
         file = open(self.backlogData.filenameDutyData,'r')
+
         for line in file:
             if line != '\n':
                 lineSplit = line.split(';')
@@ -109,8 +111,8 @@ class BacklogMgr():
                 currDtyDate = self.backlogData.currDuty.date
                 formatDateTime = '%Y-%m-%d %H:%M:%S'
 
-                startTime = datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[4],  formatDateTime)
-                endTime =   datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[5].rstrip('\n'),  formatDateTime)
+                startTime = datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[3],  formatDateTime)
+                endTime =   datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[4].rstrip('\n'),  formatDateTime)
 
                 newTask = Task(taskPrjCode, title, taskId)
                 newPiece = Piece(newTask, startTime, endTime)
@@ -219,8 +221,6 @@ class BacklogMgr():
         s += ";"
         s += str(iPiece.task.title)
         s += ";"
-        s += str(iPiece.task.completedTime)
-        s += ";"
         s += str(iPiece.startDateTime.strftime("%H:%M:%S"))
         s += ";"
         s += str(iPiece.endDateTime.strftime("%H:%M:%S"))
@@ -260,6 +260,7 @@ class BacklogMgr():
         self.backlogData.currtask = Task()
 
     def startPiece(self):
+        
         now = datetime.datetime.now()
         
         self.backlogData.currPiece = Piece(self.backlogData.currTask, now)        
