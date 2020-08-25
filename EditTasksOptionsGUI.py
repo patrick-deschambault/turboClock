@@ -89,7 +89,7 @@ class EditTasksOptionsGUI(QDialog):
 
         self.tasksList = self.backlogMgr.getTasksFromGUI()
 
-        for currRow in range(0, self.listTasksView.count()):
+        for currRow in range(0, len(self.tasksList)):
             self.updateTextRowListView(currRow, self.tasksList[currRow].title)
 
         self.updateCurrTaskSelected()
@@ -246,6 +246,7 @@ class EditTasksOptionsGUI(QDialog):
 
         lastRowListView = self.listTasksView.count() - 1
         self.listTasksView.setCurrentRow(lastRowListView)
+
 
         self.listState = State.SELECT_TASK
 
