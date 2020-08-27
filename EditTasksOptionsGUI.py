@@ -103,7 +103,6 @@ class EditTasksOptionsGUI(QDialog):
 
     def initCurrTaskLineEdits(self):
 
-        self.idInput = QLineEdit(self)
         self.titleInputErr = QLabel(self)
 
         self.titleInput = QLineEdit(self)
@@ -115,8 +114,6 @@ class EditTasksOptionsGUI(QDialog):
         self.estimatedTime = QLineEdit(self)
         self.percAccomplished = QLineEdit(self)
         self.percAccomplished.setEnabled(False)
-
-        self.layoutCurrTask.addRow("Id:", self.idInput)
 
         self.redPalette = QPalette()
         redColor = QColor(255, 0, 0)
@@ -207,7 +204,6 @@ class EditTasksOptionsGUI(QDialog):
 
     def updateCurrTaskLineEdits(self):
 
-        self.idInput.setText(self.currTaskSelected.id)
         self.titleInput.setText(self.currTaskSelected.title)
         self.prjCodeInput.setText(self.currTaskSelected.prjCode)
 
@@ -262,7 +258,6 @@ class EditTasksOptionsGUI(QDialog):
 
     def updateTaskFromLineEdits(self, iTask):
                 
-        iTask.id = self.idInput.text()
         iTask.title = self.titleInput.text()
         iTask.prjCode = self.prjCodeInput.text()
 
