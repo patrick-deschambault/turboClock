@@ -159,21 +159,17 @@ class BacklogMgr():
 
         return index
 
-    def editTaskFromGUI(self, iIndex, iTaskFromGUI):
+    def replaceTaskBacklogData(self, iIndexOfBacklog, iReplacementTask):
         
-        errors = self.validateTask(iTaskFromGUI)
+        errors = self.validateTask(iReplacementTask)
 
         if not errors:
 
-            if (iIndex >= 0 and iIndex < len(self.backlogData.tasks)):
-                self.backlogData.tasks[iIndex] = iTaskFromGUI
-            else:
-                # Need some refactoring here. We should 
-                # call addNewTask(iTaskFromGUI) but it does not exist.
-                if(not self.getIndexTaskBacklogData(iTaskFromGUI)):
-                    self.backlogData.tasks.append(iTaskFromGUI)
-                else:
-                    errors.append("*Task already exist")
+            if (iIndexOfBacklog >= 0 and iIndexOfBacklog < len(self.backlogData.tasks)):
+
+                repTask = copy.copy(iReplacementTask)
+                self.backlogData.tasks[iIndexOfBacklog] = repTask
+
         
         return errors
 
