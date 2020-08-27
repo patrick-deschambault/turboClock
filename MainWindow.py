@@ -1,6 +1,6 @@
 #-*- coding: utf-8 -*-
 
-from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication, QWidget, QLabel, QLineEdit, QPushButton, QDialog, QComboBox, QMessageBox, QProgressBar)
+from PyQt5.QtWidgets import (QLCDNumber, QVBoxLayout, QHBoxLayout, QApplication, QWidget, QLabel, QLineEdit, QPushButton, QDialog, QComboBox, QMessageBox, QProgressBar, QSystemTrayIcon)
 from PyQt5.QtCore import QTimer, QTime, QSettings
 from PyQt5.QtGui import QIcon, QPalette, QColor
 
@@ -25,8 +25,15 @@ class MainWindow(QWidget):
 
     def initUI(self):
 
-        self.resize(400, 300)
+        self.setWindowTitle("TurboClock")
 
+        self.resize(400, 300)
+        self.setWindowIcon(QIcon('Images//clock.png'))
+
+        self.icon = QSystemTrayIcon(self)
+        self.icon.setIcon(QIcon('Images//clock.png'))
+        self.icon.setVisible(True)
+        
         self.lcdNumber = QLCDNumber()
         self.lcdNumber.setNumDigits(8)
 
@@ -112,7 +119,10 @@ class MainWindow(QWidget):
 
         totalCompletionRatio = self.backlogMgr.getCompletionRatio(self.backlogMgr.backlogData.currTaskIndex) + ratioFromTimer
 
-        self.progressBar.setValue(totalCompletionRatio)
+        if totalCompletionRatio <= 100:
+            self.progressBar.setValue(totalCompletionRatio)
+        else:
+            self.progressBar.setValue(100)
     
     def updateTaskCombobox(self):
 
@@ -140,7 +150,6 @@ class MainWindow(QWidget):
             self.backlogMgr.manageTaskChangeFromGUI(self.currTaskItemRow)
 
         self.updateTimeLCD()
-
 
         self.deltaTimer = 0
         self.updateProgressBarDisplay()
