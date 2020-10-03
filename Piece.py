@@ -38,6 +38,6 @@ class Piece():
             dt = (datetime.datetime.strptime(endDT, self.datetimeFormat) \
                                      - datetime.datetime.strptime(startDT, self.datetimeFormat)).total_seconds()
                                      
-            self.task.completedTime = dt
+            self.task.completedTime = dt 
 
 

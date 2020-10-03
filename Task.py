@@ -7,17 +7,17 @@ import datetime
 
 class Task():
 
-    def __init__(self, iCode = "", iTitle = "", iID = ""):
+    def __init__(self, iPrjCode = "", iTitle = "", iID = ""):
 
+        self.internalId = 0
         self.id = iID
-        self.prjCode = iCode
+        self.prjCode = iPrjCode
         self.title = iTitle
         
         self.completedTime = 0.0
         self.estimatedTime = 0.0
 
         self.completionRatio = 0
-
 
     def __copy__(self):
         
@@ -27,7 +27,7 @@ class Task():
          taskToReturn.completionRatio = self.completionRatio
 
          return taskToReturn
-    
+
     def addCompletedTime(self, iTimeInSeconds):
 
         self.completedTime += iTimeInSeconds
@@ -44,6 +44,11 @@ class Task():
         x = time.strptime(iCompletedTimeStr, '%H:%M:%S')
         self.completedTime = datetime.timedelta(hours = x.tm_hour, minutes = x.tm_min, seconds=x.tm_sec).total_seconds()
 
+    def completedTimeStr(self):
+
+        timeStr = datetime.timedelta(seconds = self.completedTime)
+        return timeStr
+
     def setEstimatedTime(self, iEstimatedTimeStr):
 
         x = time.strptime(iEstimatedTimeStr, '%H:%M:%S')
@@ -55,7 +60,7 @@ class Task():
         
         if(self.estimatedTime > 0):
             
-            self.completionRatio = int((self.completedTime / self.estimatedTime) * 100)
+            self.completionRatio = int(self.completedTime / self.estimatedTime)
 
         else:
             self.completionRatio = 0

@@ -1,16 +1,16 @@
 
 import copy
 import datetime
+import os
 
 from Task import Task
+from Piece import Piece
 
 class Duty():
 
     def __init__(self):
 
-        self.date = datetime.datetime.now().strftime('%Y-%m-%d')
-
-        self.mondayDateCurrWeek = self.getMondayDateOfCurrWeek(self.date)
+        self.date = ""
 
         self.pieces = list()
 
@@ -18,66 +18,97 @@ class Duty():
 
         self.totalTimeCompleted = 0
 
-
     def addPiece(self, iPiece):
         
         self.pieces.append(iPiece)
 
-        self.registerPieceForTaskStats(iPiece)
+        self.registerTask(iPiece.task)
 
-    def getMondayDateOfCurrWeek(self, iDate):
-
-        format = '%Y-%m-%d'
-        date = datetime.datetime.strptime(iDate, format)
-        weekday = date.weekday()
-
-        return (date - datetime.timedelta(days=weekday)).strftime(format)
-
-    def registerPieceForTaskStats(self, iPiece):
+    def registerTask(self, iTask):
     
-        taskOfPce = copy.copy(iPiece.task)
+        task = copy.copy(iTask)
 
-        isTaskIDFoundInRegisteredTasks = False
-        isTaskNoIDFoundInRegisteredTasks = False
+        taskRegistered = False
         index = 0
 
         if len(self.tasksRegistered) > 0:
 
             for i, currTask in enumerate(self.tasksRegistered):
 
-                if currTask.id != "":
-                    if currTask.id == taskOfPce.id:
-                        isTaskIDFoundInRegisteredTasks = True
+                if currTask.title != "":
+                    if currTask.prjCode == task.prjCode and currTask.title == task.title:
+                            
+                        taskRegistered = True
                         index = i
                         break
                     else:
                         continue
                 else:
-                    if currTask.title != "":
-                        if currTask.prjCode == taskOfPce.prjCode and currTask.title == taskOfPce.title:
-                            
-                            isTaskNoIDFoundInRegisteredTasks = True
-                            index = i
-                            break
-                        else:
-                            continue
-                    else:
-                        #Impossible to register a task with no description with time completed
-                        continue
+                    continue
 
-            if isTaskIDFoundInRegisteredTasks or isTaskNoIDFoundInRegisteredTasks:
-                self.tasksRegistered[index].addCompletedTime(taskOfPce.completedTime)
-                self.totalTimeCompleted += taskOfPce.completedTime
+            if taskRegistered:
+                self.tasksRegistered[index].addCompletedTime(task.completedTime)
+                self.totalTimeCompleted += task.completedTime
             else:
-                self.tasksRegistered.append(taskOfPce)
-                self.totalTimeCompleted += taskOfPce.completedTime
+                self.tasksRegistered.append(task)
+                self.totalTimeCompleted += task.completedTime
         else:
-            self.tasksRegistered.append(taskOfPce)
-            self.totalTimeCompleted += taskOfPce.completedTime
+            self.tasksRegistered.append(task)
+            self.totalTimeCompleted += task.completedTime
 
+    def load(self, iFileName):
 
-
-
-
+        dutyDataExist = os.path.isfile(iFileName)
         
+        if not dutyDataExist:
+            file = open(iFileName, 'w+')
+            file.close()
+            return
+
+        file = open(iFileName,'r')
+
+        for line in file:
+            if line != '\n':
+                lineSplit = line.split(';')
+
+                taskId = lineSplit[0]
+                taskPrjCode = lineSplit[1]
+                title = lineSplit[2]
+
+                currDtyDate = datetime.datetime.now()
+                formatDateTime = '%Y-%m-%d %H:%M:%S'
+
+                startTime = datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[3],  formatDateTime)
+                endTime =   datetime.datetime.strptime(currDtyDate + ' ' + lineSplit[4].rstrip('\n'),  formatDateTime)
+
+                newTask = Task(taskPrjCode, title, taskId)
+                newPiece = Piece(newTask, startTime, endTime)
+
+                self.addPiece(newPiece)
+
+        file.close()
+
+    def save(self, iFilename):
+
+        if not os.path.exists(iFilename):
+            os.makedirs(iFilename)
+
+        s = ""
+
+        for currPiece in self.pieces:
+
+            s += str(currPiece.task.id)
+            s += ";"
+            s += str(currPiece.task.prjCode)
+            s += ";"
+            s += str(currPiece.task.title)
+            s += ";"
+            s += str(currPiece.startDateTime.strftime("%H:%M:%S"))
+            s += ";"
+            s += str(currPiece.endDateTime.strftime("%H:%M:%S"))
+            s += '\n'
+
+        with open(iFilename, "a") as file:
+            file.write(s)
+            file.close()
 
